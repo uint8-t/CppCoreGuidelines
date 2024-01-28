@@ -23,12 +23,9 @@
 
 ```cpp
 for (const int i : c) cout << i << '\n';    // 仅进行读取: const
-```
 
-```cpp
 for (int i : c) cout << i << '\n';          // 不好: 仅进行读取
 ```
-
 ##### 例外
 
 按值传递的函数参数很少被改动，但也很少被声明为 `const`。
@@ -38,7 +35,6 @@ for (int i : c) cout << i << '\n';          // 不好: 仅进行读取
 void f(const char* const p); // 迂腐
 void g(const int i) { ... }  // 迂腐
 ```
-
 注意，函数参数是局部变量，其改动也是局部的。
 
 ##### 强制实施
@@ -61,15 +57,12 @@ public:
     int getx() { return x; }    // 不好，应当为 const，它并不改变对象的状态
     // ...
 };
-```
 
-```cpp
 void f(const Point& pt)
 {
     int x = pt.getx();          // 错误，无法通过编译，因为 getx 并未标记为 const
 }
 ```
-
 ##### 注解
 
 传递非 `const` 的指针或引用并非天生就是不好的，
@@ -94,7 +87,6 @@ void f(const Point& pt)
 void f(int* p);   // 老代码：f() 并不会修改 `*p`
 void f(const int* p) { f(const_cast<int*>(p)); } // 包装函数
 ```
-
 注意，这种包装函数的方案是一种补丁，只能在无法修改 `f()` 的声明时才使用它，
 比如当它属于某个你无法修改的程序库时。
 
@@ -120,7 +112,6 @@ private:
     // ...
 };
 ```
-
 另一种说法是 `const` 特性不会传递。
 通过 `const` 成员函数改动 `mutable` 成员的值和通过非 `const` 指针来访问的对象的值
 是有可能的。
@@ -146,7 +137,6 @@ private:
 void f(char* p);        // f 会不会修改 *p?（假定它会修改）
 void g(const char* p);  // g 不会修改 *p
 ```
-
 ##### 注解
 
 传递指向非 `const` 对象的指针或引用并不是天生就有问题的，
@@ -174,16 +164,13 @@ void f()
 {
     int x = 7;
     const int y = 9;
-```
 
-```cpp
     for (;;) {
         // ...
     }
     // ...
 }
 ```
-
 既然 `x` 并非 `const`，我们就必须假定它可能在循环中的某处会被修改。
 
 ##### 强制实施
@@ -203,7 +190,6 @@ double x = f(2);            // 可能在运行时求值
 const double y = f(2);      // 可能在运行时求值
 constexpr double z = f(2);  // 除非 f(2) 可在编译期求值，否则会报错
 ```
-
 ##### 注解
 
 参见 F.4。

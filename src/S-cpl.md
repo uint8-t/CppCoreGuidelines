@@ -25,7 +25,6 @@ void* pv = &ch;
 int* pi = pv;   // 非 C++
 *pi = 999;      // 覆盖了 &ch 附近的 sizeof(int) 个字节
 ```
-
 针对在 C 中从 `void*` 或向它进行的隐式强制转换的相关规则比较麻烦而且并未强制实施。
 特别是，这个例子违反了禁止把类型转换为具有更严格对齐的类型的规则。
 
@@ -47,7 +46,6 @@ int* p2 = static_cast<int*>(malloc(10 * sizeof(int)));   // 非 C, C 风格的 C
 int* p3 = new int[10];                                   // 非 C
 int* p4 = (int*) malloc(10 * sizeof(int));               // C 和 C++ 均可
 ```
-
 ##### 强制实施
 
 * 当使用某种将代码作为 C 来编译的构建模式时进行标记。
@@ -72,17 +70,12 @@ C++ 比 C 的表达能力更强，而且为许多种类的编程都提供了更�
 ```cpp
 // C 中:
 double sqrt(double);
-```
 
-```cpp
 // C++ 中:
 extern "C" double sqrt(double);
-```
 
-```cpp
 sqrt(2);
 ```
-
 ##### 示例
 
 在 C 中可以调用 C++：
@@ -90,16 +83,13 @@ sqrt(2);
 ```cpp
 // C 中:
 X call_f(struct Y*, int);
-```
 
-```cpp
 // C++ 中:
 extern "C" X call_f(Y* p, int i)
 {
     return p->f(i);   // 可能是虚函数调用
 }
 ```
-
 ##### 强制实施
 
 不需要做什么。

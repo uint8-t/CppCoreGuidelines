@@ -74,34 +74,24 @@ href="#Rper-Knuth">Per.2</a>。）
 
 ```cpp
 // 清晰表达意图，快速执行
-```
 
-```cpp
 vector<uint8_t> v(100000);
-```
 
-```cpp
 for (auto& c : v)
     c = ~c;
 ```
-
 ##### 示例，不好
 
 ```cpp
 // 试图更快，但通常会更慢
-```
 
-```cpp
 vector<uint8_t> v(100000);
-```
 
-```cpp
 for (size_t i = 0; i < v.size(); i += sizeof(uint64_t)) {
     uint64_t& quad_word = *reinterpret_cast<uint64_t*>(&v[i]);
     quad_word = ~quad_word;
 }
 ```
-
 ##### 注解
 
 ???
@@ -154,7 +144,6 @@ for (size_t i = 0; i < v.size(); i += sizeof(uint64_t)) {
 ```cpp
 void qsort (void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 ```
-
 什么情况会需要对内存进行排序呢？
 时即上，我们需要对元素序列进行排序，通常它们存储于容器之中。
 对 `qsort` 的调用抛弃了许多有用的信息（比如元素的类型），强制用户对其已知的信息
@@ -164,14 +153,11 @@ void qsort (void* base, size_t num, size_t size, int (*compar)(const void*, cons
 ```cpp
 double data[100];
 // ... 填充 a ...
-```
 
-```cpp
 // 对从地址 data 开始的 100 块 sizeof(double) 大小
 // 的内存，用由 compare_doubles 所定义的顺序进行排序
 qsort(data, 100, sizeof(double), compare_doubles);
 ```
-
 从接口设计的观点来看，`qsort` 抛弃了有用的信息。
 
 这样做可以更好（C++98）：
@@ -179,12 +165,9 @@ qsort(data, 100, sizeof(double), compare_doubles);
 ```cpp
 template<typename Iter>
     void sort(Iter b, Iter e);  // sort [b:e)
-```
 
-```cpp
 sort(data, data + 100);
 ```
-
 这里，我们利用了编译器关于数组大小，元素类型，以及如何对 `double` 进行比较的知识。
 
 而以 C++20 的话，我们还可以做得更好：
@@ -193,12 +176,9 @@ sort(data, data + 100);
 // sortable 指定了 c 必须是一个
 // 可以用 < 进行比较的元素的随机访问序列
 void sort(sortable auto& c);
-```
 
-```cpp
 sort(c);
 ```
-
 其中的关键在于传递充分的信息以便能够选择一个好的实现。
 这里给出的几个 `sort` 接口仍然有一个缺憾：
 它们隐含地依赖于元素类型定义了小于（`<`）运算符。
@@ -209,7 +189,6 @@ sort(c);
 template<random_access_range R, class C> requires sortable<R, C>
 void sort(R&& r, C c);
 ```
-
 `sort` 的标准库规范提供了这两个版本和其他版本。
 
 ##### 注解
@@ -253,7 +232,6 @@ void sort(R&& r, C c);
 template<class ForwardIterator, class T>
 bool binary_search(ForwardIterator first, ForwardIterator last, const T& val);
 ```
-
 `binary_search(begin(c), end(c), 7)` 能够得出 `7` 是否在 `c` 之中。
 不过，它无法得出 `7` 在何处，或者是否有多于一个 `7`。
 
@@ -264,7 +242,6 @@ bool binary_search(ForwardIterator first, ForwardIterator last, const T& val);
 template<class ForwardIterator, class T>
 ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& val);
 ```
-
 `lower_bound` 返回第一个匹配元素（如果有）的迭代器，否则返回第一个大于 `val` 的元素的迭代器，找不到这样的元素时，返回 `last`。
 
 不过 `lower_bound` 还是无法为所有用法返回足够的信息，因此标准库还提供了
@@ -274,7 +251,6 @@ template<class ForwardIterator, class T>
 pair<ForwardIterator, ForwardIterator>
 equal_range(ForwardIterator first, ForwardIterator last, const T& val);
 ```
-
 `equal_range` 返回迭代器的 `pair`，指定匹配的第一个和最后一个之后的元素。
 
 ```cpp
@@ -282,7 +258,6 @@ auto r = equal_range(begin(c), end(c), 7);
 for (auto p = r.first; p != r.second; ++p)
     cout << *p << '\n';
 ```
-
 显然，这三个接口都是以相同的基本代码实现的。
 它们不过是将基本的二叉搜索算法表现给用户的三种方式，
 包含从最简单（“让简单的事情简单！”）
@@ -350,9 +325,7 @@ for (auto p = r.first; p != r.second; ++p)
 ```cpp
 double square(double d) { return d*d; }
 static double s2 = square(2);    // 旧式代码：动态初始化
-```
 
-```cpp
 constexpr double ntimes(double d, int n)   // 假定 0 <= n
 {
         double m = 1;
@@ -361,7 +334,6 @@ constexpr double ntimes(double d, int n)   // 假定 0 <= n
 }
 constexpr double s3 {ntimes(2, 3)};  // 现代代码：编译期初始化
 ```
-
 像 `s2` 的初始化这样的代码并不少见，尤其是比 `square()` 更复杂一些的初始化更是如此。
 不过，与 `s3` 的初始化相比，它有两个问题：
 
@@ -376,33 +348,25 @@ constexpr double s3 {ntimes(2, 3)};  // 现代代码：编译期初始化
 
 ```cpp
 constexpr int on_stack_max = 20;
-```
 
-```cpp
 template<typename T>
 struct Scoped {     // 在 Scoped 中存储一个 T
         // ...
     T obj;
 };
-```
 
-```cpp
 template<typename T>
 struct On_heap {    // 在自由存储中存储一个 T
         // ...
         T* objp;
 };
-```
 
-```cpp
 template<typename T>
 using Handle = typename std::conditional<(sizeof(T) <= on_stack_max),
                     Scoped<T>,      // 第一种候选
                     On_heap<T>      // 第二种候选
                >::type;
-```
 
-```cpp
 void f()
 {
     Handle<double> v1;                   // double 在栈中
@@ -410,7 +374,6 @@ void f()
     // ...
 }
 ```
-
 假定 `Scoped` 和 `On_heap` 均提供了兼容的用户接口。
 这里我们在编译时计算出了最优的类型。
 对于选择所要调用的最优函数，也有类似的技术。
@@ -476,22 +439,17 @@ void f()
 
 ```cpp
 int matrix[rows][cols];
-```
 
-```cpp
 // 不好
 for (int c = 0; c < cols; ++c)
     for (int r = 0; r < rows; ++r)
         sum += matrix[r][c];
-```
 
-```cpp
 // 好
 for (int r = 0; r < rows; ++r)
     for (int c = 0; c < cols; ++c)
         sum += matrix[r][c];
 ```
-
 ### <a name="Rper-context"></a>Per.30: 避免在关键路径中进行上下文切换
 
 ???

@@ -1,5 +1,3 @@
-# Summary
-
 [C++ 核心指导方针](main.md)
 [概要](S-abstract.md)
 [In: 导言](S-introduction.md)
@@ -31,4 +29,3 @@
 [附录 D: 支持工具](S-tools.md)
 [词汇表](S-glossary.md)
 [To-do: 未分类的规则原型](S-unclassified.md)
-[参考文献](references.md)

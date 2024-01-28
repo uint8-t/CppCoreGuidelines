@@ -98,13 +98,11 @@ ISO C++ 标准库是最广为了解而且经过最好测试的程序库之一。
 ```cpp
 auto sum = accumulate(begin(a), end(a), 0.0);   // 好
 ```
-
 `accumulate` 的范围版本就更好了：
 
 ```cpp
 auto sum = accumulate(v, 0.0); // 更好
 ```
-
 但请不要手工编写众所周知的算法：
 
 ```cpp
@@ -113,7 +111,6 @@ double sum = 0.0;
 for (int i = 0; i < max; ++i)
     sum = sum + v[i];
 ```
-
 ##### 例外
 
 标准库的很大部分都依赖于动态分配（自由存储）。这些部分，尤其是容器但并不包括算法，并不适用于某些硬实时和嵌入式的应用的。在这些情况下，请考虑提供或使用类似的设施，比如说某个标准库风格的采用池分配器的容器实现。
@@ -139,7 +136,6 @@ vector<string> read1(istream& is)   // 好
     return res;
 }
 ```
-
 与之近乎等价的更传统且更低层的代码，更长、更混乱、更难编写正确，而且很可能更慢：
 
 ```cpp
@@ -156,7 +152,6 @@ char** read2(istream& is, int maxelem, int maxstring, int* nread)   // 不好：
     return res;
 }
 ```
-
 一旦添加了溢出检查和错误处理，代码就变得相当混乱了，而且还有个要记得 `delete` 其所返回的指针以及数组所包含的 C 风格字符串的问题。
 
 ##### 强制实施
@@ -185,23 +180,18 @@ void func(bool flag)    // 不好，重复代码
         z();
     }
 }
-```
 
-```cpp
 void func(bool flag)    // 更好，没有重复代码
 {
     x();
-```
 
-```cpp
     if (flag)
         y();
     else
         z();
 }
+
 ```
-
-
 ##### 强制实施
 
 * 采用静态分析器。它至少会找出一些重复的代码构造。
@@ -228,9 +218,7 @@ void use()
     for (i = 0; i < 20; ++i) { /* ... */ }
     // 此处不存在对 i 的有意使用
     for (int i = 0; i < 20; ++i) { /* ... */ }  // 好: i 局部于 for 循环
-```
 
-```cpp
     if (auto pc = dynamic_cast<Circle*>(ps)) {  // 好: pc 局部于 if 语句
         // ... 处理 Circle ...
     }
@@ -239,7 +227,6 @@ void use()
     }
 }
 ```
-
 ##### 示例，不好
 
 ```cpp
@@ -252,7 +239,6 @@ void use(const string& name)
     // ... 200 行代码，都不存在使用 fn 或 is 的意图 ...
 }
 ```
-
 大多数测量都会称这个函数太长了，但其关键点是 `fn` 所使用的资源和 `is` 所持有的文件句柄
 所持有的时间比其所需长太多了，而且可能在函数后面意外地出现对 `is` 和 `fn` 的使用。
 这种情况下，把读取操作重构出来可能是一个好主意：
@@ -266,16 +252,13 @@ Record load_record(const string& name)
     is >> r;
     return r;
 }
-```
 
-```cpp
 void use(const string& name)
 {
     Record r = load_record(name);
     // ... 200 行代码 ...
 }
 ```
-
 ##### 强制实施
 
 * 对声明于循环之外，且在循环之后不再使用的循环变量进行标记。
@@ -297,15 +280,11 @@ void use()
 {
     for (string s; cin >> s;)
         v.push_back(s);
-```
 
-```cpp
     for (int i = 0; i < 20; ++i) {   // 好: i 局部于 for 循环
         // ...
     }
-```
 
-```cpp
     if (auto pc = dynamic_cast<Circle*>(ps)) {   // 好: pc 局部于 if 语句
         // ... 处理 Circle ...
     }
@@ -314,7 +293,6 @@ void use()
     }
 }
 ```
-
 ##### 示例，请勿如此
 
 ```cpp
@@ -324,7 +302,6 @@ for (j = 0; j < 100; ++j) {
 }
 // j 在此处仍可见但并不需要
 ```
-
 **另请参见**: [不要用一个变量来达成两个不相关的目的](S-expr.md#Res-recycle)
 
 ##### 强制实施
@@ -341,16 +318,13 @@ for (j = 0; j < 100; ++j) {
 
 ```cpp
 map<int, string> mymap;
-```
 
-```cpp
 if (auto result = mymap.insert(value); result.second) {
     // 本代码块中，插入成功且 result 有效
     use(result.first);  // ok
     // ...
 } // result 在此处销毁
 ```
-
 ##### C++17 和 C++20 强制实施（当使用 C++17 或 C++20 编译器时）
 
 * 选择/循环变量，若其在选择或循环体之前声明而在其之后不再使用，则对其进行标记
@@ -374,7 +348,6 @@ void print(ostream& os, const vector<T>& v)
         os << v[i] << '\n';
 }
 ```
-
 索引根据惯例称为 `i`，而这个泛型函数中不存在有关这个 vector 的含义的提示，因此和其他名字一样， `v` 也没问题。与之相比，
 
 ```cpp
@@ -388,7 +361,6 @@ void print(ostream& target_stream, const vector<Element_type>& current_vector)
     target_stream << current_vector[current_element_index] << '\n';
 }
 ```
-
 当然，这是一个讽刺，但我们还见过更糟糕的。
 
 ##### 示例
@@ -403,7 +375,6 @@ void use1(const string& s)
     // ...
 }
 ```
-
 更好的做法是，为非局部实体提供可读的名字：
 
 ```cpp
@@ -414,7 +385,6 @@ void use1(const string& s)
     // ...
 }
 ```
-
 这样的话，有可能读者指导 `trim_tail` 是什么意思，而且读者可以找一下它并回忆起来。
 
 ##### 示例，不好
@@ -429,7 +399,6 @@ void complicated_algorithm(vector<Record>& vr, const vector<int>& vi, map<string
     // ... 500 行的代码，使用 vr，vi，和 out ...
 }
 ```
-
 我们建议保持函数短小，但这条规则并不受到普遍坚持，而命名应当能反映这一点。
 
 ##### 强制实施
@@ -447,7 +416,6 @@ void complicated_algorithm(vector<Record>& vr, const vector<int>& vi, map<string
 ```cpp
 if (readable(i1 + l1 + ol + o1 + o0 + ol + o1 + I0 + l0)) surprise();
 ```
-
 ##### 示例，不好
 
 不要在同一个作用域中用和类型相同的名字声明一个非类型实体。这样做将消除为区分它们所需的关键字 `struct` 或 `enum` 等。这同样消除了一种错误来源，因为 `struct X` 在对 `X` 的查找失败时会隐含地声明新的 `X`。
@@ -457,7 +425,6 @@ struct foo { int n; };
 struct foo foo();       // 不好, foo 在作用域中已经是一个类型了
 struct foo x = foo();   // 需要进行区分
 ```
-
 ##### 例外
 
 很古老的头文件中可能会用在相同作用域中用同一个名字同时声明非类型实体和类型。
@@ -477,15 +444,11 @@ struct foo x = foo();   // 需要进行区分
 
 ```cpp
 // 某个头文件中：
-```
-    #define NE !=
+#define NE !=
 
-```cpp
 // 某个别的头文件中的别处：
 enum Coord { N, NE, NW, S, SE, SW, E, W };
-```
 
-```cpp
 // 某个糟糕程序员的 .cpp 中的第三处：
 switch (direction) {
 case N:
@@ -495,7 +458,6 @@ case NE:
 // ...
 }
 ```
-
 ##### 注解
 
 不要仅仅因为常量曾经是宏，就使用 `ALL_CAPS` 作为常量。
@@ -517,7 +479,6 @@ case NE:
 ```cpp
 char *p, c, a[7], *pp[7], **aa[10];   // 讨厌！
 ```
-
 ##### 例外
 
 函数声明中可以包含多个函数参数声明。
@@ -530,26 +491,22 @@ char *p, c, a[7], *pp[7], **aa[10];   // 讨厌！
 auto [iter, inserted] = m.insert_or_assign(k, val);
 if (inserted) { /* 已插入新条目 */ }
 ```
-
 ##### 示例
 
 ```cpp
 template<class InputIterator, class Predicate>
 bool any_of(InputIterator first, InputIterator last, Predicate pred);
 ```
-
 用 concept 则更佳：
 
 ```cpp
 bool any_of(input_iterator auto first, input_iterator auto last, predicate auto pred);
 ```
-
 ##### 示例
 
 ```cpp
 double scalbn(double x, int n);   // OK: x * pow(FLT_RADIX, n); FLT_RADIX 通常为 2
 ```
-
 或者：
 
 ```cpp
@@ -558,20 +515,17 @@ double scalbn(    // 有改善: x * pow(FLT_RADIX, n); FLT_RADIX 通常为 2
     int n         // 指数
 );
 ```
-
 或者：
 
 ```cpp
 // 有改善: base * pow(FLT_RADIX, exponent); FLT_RADIX 通常为 2
 double scalbn(double base, int exponent);
 ```
-
 ##### 示例
 
 ```cpp
 int a = 10, b = 11, c = 12, d, e = 14, f = 15;
 ```
-
 在较长的声明符列表中，很容易忽视某个未能初始化的变量。
 
 ##### 强制实施
@@ -599,7 +553,6 @@ auto h = t.future();
 auto q = make_unique<int[]>(s);
 auto f = [](int x) { return x + 10; };
 ```
-
 以上都避免了写下冗长又难记的类型，它们是编译器已知的，但程序员则可能会搞错。
 
 ##### 示例
@@ -608,7 +561,6 @@ auto f = [](int x) { return x + 10; };
 template<class T>
 auto Container<T>::first() -> Iterator;   // Container<T>::Iterator
 ```
-
 ##### 例外
 
 当使用初始化式列表，而所需要的确切类型是已知的，同时某个初始化式可能需要转换时，应当避免使用 `auto`。
@@ -619,7 +571,6 @@ auto Container<T>::first() -> Iterator;   // Container<T>::Iterator
 auto lst = { 1, 2, 3 };   // lst 是一个 initializer_list
 auto x{1};   // x 是一个 int（C++17；在 C++11 中则为 initializer_list）
 ```
-
 ##### 注解
 
 C++20 的情况是，我们可以（而且应该）使用概念来更加明确地说明所推断的类型：
@@ -628,7 +579,6 @@ C++20 的情况是，我们可以（而且应该）使用概念来更加明确�
 // ...
 forward_iterator auto p = algo(x, y, z);
 ```
-
 ##### 示例（C++17）
 
 ```cpp
@@ -636,7 +586,6 @@ std::set<int> values;
 // ...
 auto [ position, newly_inserted ] = values.insert(5);   // 展开 std::pair 的成员
 ```
-
 ##### 强制实施
 
 对声明中多余的类型名字进行标记。
@@ -665,12 +614,9 @@ else {
     d = value_to_be_returned;
     // ...
 }
-```
 
-```cpp
 return d;
 ```
-
 这是个大型的 `if` 语句，很容易忽视在内部作用域中所引入的新的 `d`。
 这是一种已知的 BUG 来源。
 这种在内部作用域中的名字重用有时候被称为“遮蔽“。
@@ -687,16 +633,13 @@ return d;
 void f(int x)
 {
     int x = 4;  // 错误：重用函数参数的名字
-```
 
-```cpp
     if (x) {
         int x = 7;  // 允许，但不好
         // ...
     }
 }
 ```
-
 ##### 示例，不好
 
 把成员名重用为局部变量也会造成问题：
@@ -706,9 +649,7 @@ struct S {
     int m;
     void f(int x);
 };
-```
 
-```cpp
 void S::f(int x)
 {
     m = 7;    // 对成员赋值
@@ -720,7 +661,6 @@ void S::f(int x)
     }
 }
 ```
-
 ##### 例外
 
 我们经常在派生类中重用基类中的函数名：
@@ -729,15 +669,12 @@ void S::f(int x)
 struct B {
     void f(int);
 };
-```
 
-```cpp
 struct D : B {
     void f(double);
     using B::f;
 };
 ```
-
 这样做是易错的。
 例如，要是忘了 using 声明式的话，`d.f(1)` 的调用就不会找到 `int` 版本的 `f`。
 
@@ -768,7 +705,6 @@ void use(int arg)
     i = 7;   // 初始化 i
 }
 ```
-
 错了，`i = 7` 并不是 `i` 的初始化；它是向其赋值。而且 `i` 也可能在 `...` 的部分中被读取。更好的做法是：
 
 ```cpp
@@ -779,7 +715,6 @@ void use(int arg)   // OK
     // ...
 }
 ```
-
 ##### 注释
 
 我们有意让*总是进行初始化*规则比*对象在使用前必须设值*的语言规则更强。
@@ -800,9 +735,7 @@ void use(int arg)   // OK
 ```cpp
 widget i;    // "widget" 是一个初始化操作昂贵的类型，可能是一种大型 POD
 widget j;
-```
 
-```cpp
 if (cond) {  // 不好: i 和 j 进行了“延迟”初始化
     i = f1();
     j = f2();
@@ -812,7 +745,6 @@ else {
     j = f4();
 }
 ```
-
 这段代码是无法简单重写为用初始化式来对 `i` 和 `j` 进行初始化的。
 注意，对于带有默认构造函数的类型来说，试图延后初始化只会导致变为一次默认初始化之后跟着一次赋值的做法。
 这种例子的一种更加流行的理由是“效率”，不过可以检查出是否出现“设置前使用”错误的编译器，同样可以消除任何多余的双重初始化。
@@ -824,33 +756,25 @@ pair<widget, widget> make_related_widgets(bool x)
 {
     return (x) ? {f1(), f2()} : {f3(), f4()};
 }
-```
 
-```cpp
 auto [i, j] = make_related_widgets(cond);    // C++17
 ```
-
 如果除此之外 `make_related_widgets` 函数是多余的，
 可以使用 lambda [ES.28](S-expr.md#Res-lambda-init) 来消除之：
 
 ```cpp
 auto [i, j] = [x] { return (x) ? pair{f1(), f2()} : pair{f3(), f4()} }();    // C++17
 ```
-
 用一个值代表 `uninitialized` 只是一种问题的症状，而不是一种解决方案：
 
 ```cpp
 widget i = uninit;  // 不好
 widget j = uninit;
-```
 
-```cpp
 // ...
 use(i);         // 可能发生设值前使用
 // ...
-```
 
-```cpp
 if (cond) {     // 不好: i 和 j 进行了“延迟”初始化
     i = f1();
     j = f2();
@@ -860,7 +784,6 @@ else {
     j = f4();
 }
 ```
-
 这样的话编译器甚至无法再简单地检测出“设值前使用”。而且我们也在 widget 的状态空间中引入了复杂性：哪些操作对 `uninit` 的 widget 是有效的，哪些不是？
 
 ##### 注解
@@ -878,22 +801,17 @@ class X {
 public:
     X(int i, int ci) : m2{i}, cm2{ci} {}
     // ...
-```
 
-```cpp
 private:
     int m1 = 7;
     int m2;
     int m3;
-```
 
-```cpp
     const int cm1 = 7;
     const int cm2;
     const int cm3;
 };
 ```
-
 编译器能够标记 `cm3` 为未初始化（因其为 `const`），但它无法发觉 `m3` 缺少初始化。
 通常来说，以很少不恰当的成员初始化来消除错误，要比缺乏初始化更有价值，
 而且优化器是可以消除冗余的初始化的（比如紧跟在赋值之前的初始化）。
@@ -908,7 +826,6 @@ constexpr int max = 8 * 1024;
 int buf[max];         // OK, 但是可疑: 未初始化
 f.read(buf, max);
 ```
-
 由于数组和 `std::array` 的有所限制的初始化规则，它们提供了对于需要这种例外的大多数有意义的例子。
 
 某些情况下，这个数组进行初始化的成本可能是显著的。
@@ -919,14 +836,12 @@ constexpr int max = 8 * 1024;
 int buf[max] = {};   // 某些情况下更好
 f.read(buf, max);
 ```
-
 如果可行的话，应当用某个已知不会溢出的库函数。例如：
 
 ```cpp
 string s;   // s 默认初始化为 ""
 cin >> s;   // s 进行扩充以持有字符串
 ```
-
 不要把用于输入操作的简单变量作为本条规则的例外：
 
 ```cpp
@@ -934,7 +849,6 @@ int i;   // 不好
 // ...
 cin >> i;
 ```
-
 在并不罕见的情况下，当输入目标和输入操作分开（其实不应该）时，就带来了发生“设值前使用”的可能性。
 
 ```cpp
@@ -942,7 +856,6 @@ int i2 = 0;   // 更好，假设 0 是 i2 可接受的值
 // ...
 cin >> i2;
 ```
-
 优秀的优化器应当能够识别输入操作并消除这种多余的操作。
 
 
@@ -958,7 +871,6 @@ Value v = [&] {
     return p.second;
 }();
 ```
-
 还可以是：
 
 ```cpp
@@ -968,7 +880,6 @@ Value v = [] {
     return p.second;
 }();
 ```
-
 **参见**: [ES.28](S-expr.md#Res-lambda-init)
 
 ##### 强制实施
@@ -991,7 +902,6 @@ int x = 7;
 // ... 这里没有对 x 的使用 ...
 ++x;
 ```
-
 ##### 强制实施
 
 对离其首次使用很远的声明进行标记。
@@ -1009,14 +919,11 @@ string s;
 // ... 此处没有 s 的使用 ...
 s = "what a waste";
 ```
-
 ##### 示例，不好
 
 ```cpp
 SomeLargeType var;  // 很难读的驼峰变量
-```
 
-```cpp
 if (cond)   // 某个不简单的条件
     Set(&var);
 else if (cond2 || !cond3) {
@@ -1027,12 +934,9 @@ else {
     for (auto& e : something)
         var += e;
 }
-```
 
-```cpp
 // 使用 var; 可以仅通过控制流而静态地保证这并不会过早进行
 ```
-
 如果 `SomeLargeType` 的默认初始化并非过于昂贵的话就没什么问题。
 不过，程序员可能十分想知道是否所有的穿过这个条件迷宫的路径都已经被覆盖到了。
 如果没有的话，就存在一个“设值前使用”的 BUG。这是维护工作的一个陷阱。
@@ -1061,7 +965,6 @@ int x {f(99)};
 int y = x;
 vector<int> v = {1, 2, 3, 4, 5, 6};
 ```
-
 ##### 例外
 
 对于容器来说，存在用 `{...}` 给出元素列表而用 `(...)` 给出大小的传统做法：
@@ -1069,13 +972,10 @@ vector<int> v = {1, 2, 3, 4, 5, 6};
 ```cpp
 vector<int> v1(10);    // vector 有 10 个具有默认值 0 的元素
 vector<int> v2{10};    // vector 有 1 个值为 10 的元素
-```
 
-```cpp
 vector<int> v3(1, 2);  // vector 有 1 个值为 2 的元素
 vector<int> v4{1, 2};  // vector 有 2 个值为 1 和 2 的元素
 ```
-
 ##### 注解
 
 `{}` 初始化式不允许进行窄化转换（这点通常都很不错），并允许使用显式构造函数（这没有问题，我们的意图就是初始化一个新变量）。
@@ -1087,7 +987,6 @@ int x {7.9};   // 错误: 发生窄化
 int y = 7.9;   // OK: y 变为 7. 希望编译器给出了警告消息
 int z = gsl::narrow_cast<int>(7.9);  // OK: 这个正是你想要的
 ```
-
 ##### 注解
 
 `{}` 初始化可以用于几乎所有的初始化；而其他的初始化则不行：
@@ -1103,7 +1002,6 @@ struct S {
     // ...
 };
 ```
-
 由于这个原因，以 `{}` 进行初始化通常被称为“统一初始化”，
 （但很可惜存在少数不符合规则的例外）。
 
@@ -1115,19 +1013,15 @@ C++17 的规则多少会少些意外：
 ```cpp
 auto x1 {7};        // x1 是一个值为 7 的 int
 auto x2 = {7};      // x2 是一个具有一个元素 7 的 initializer_list<int>
-```
 
-```cpp
 auto x11 {7, 8};    // 错误: 两个初始化式
 auto x22 = {7, 8};  // x22 是一个具有元素 7 和 8 的 initializer_list<int>
 ```
-
 如果确实需要一个 `initializer_list<T>` 的话，可以使用 `={...}`：
 
 ```cpp
 auto fib10 = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55};   // fib10 是一个列表
 ```
-
 ##### 注解
 
 `={}` 进行的是复制初始化，而 `{}` 则进行直接初始化。
@@ -1136,13 +1030,10 @@ auto fib10 = {1, 1, 2, 3, 5, 8, 13, 21, 34, 55};   // fib10 是一个列表
 
 ```cpp
 struct Z { explicit Z() {} };
-```
 
-```cpp
 Z z1{};     // OK: 直接初始化，使用的是 explicit 构造函数
 Z z2 = {};  // 错误: 复制初始化，不能使用 explicit 构造函数
 ```
-
 除非特别要求禁止使用显式构造函数，否则都应当使用普通的 `{}` 初始化。
 
 ##### 示例
@@ -1153,15 +1044,12 @@ void f()
 {
     T x1(1);    // T 以 1 进行初始化
     T x0();     // 不好: 函数声明（一般都是一个错误）
-```
 
-```cpp
     T y1 {1};   // T 以 1 进行初始化
     T y0 {};    // 默认初始化 T
     // ...
 }
 ```
-
 **参见**: [讨论](#???)
 
 ##### 强制实施
@@ -1193,7 +1081,6 @@ void use(bool leak)
     // ...
 }
 ```
-
 当 `leak == true` 时，`p2` 所指向的对象就会泄漏，而 `p1` 所指向的对象则不会。
 当 `at()` 抛出异常时也是同样的情况。两种情况下，都没能到达 `delete p2` 语句。
 
@@ -1217,7 +1104,6 @@ void f(int n)
     // ...
 }
 ```
-
 ##### 强制实施
 
 查看变量是不是真的被改动过，若并非如此就进行标记。
@@ -1240,7 +1126,6 @@ void use()
     for (i = 0; i < 200; ++i) { /* ... */ } // 不好: i 重复使用了
 }
 ```
-
 +##### 注解
 
 也许你想把一个缓冲区当做暂存器来重复使用以作为一种优化措施，但即便如此也请尽可能限定该变量的作用域，还要当心不要导致由于遗留在重用的缓冲区中的数据而引发的 BUG，这是安全性 BUG 的一种常见来源。
@@ -1253,20 +1138,15 @@ void write_to_file()
         // 第一部分工作。
         generate_first_string(buffer, o);
         write_to_file(buffer);
-```
 
-```cpp
         // 第二部分工作。
         generate_second_string(buffer, o);
         write_to_file(buffer);
-```
 
-```cpp
         // 等等...
     }
 }
 ```
-
 ##### 强制实施
 
 标记被重复使用的变量。
@@ -1283,9 +1163,7 @@ void write_to_file()
 ```cpp
 const int n = 7;
 int m = 9;
-```
 
-```cpp
 void f()
 {
     int a1[n];
@@ -1293,7 +1171,6 @@ void f()
     // ...
 }
 ```
-
 ##### 注解
 
 `a1` 的定义是合法的 C++ 而且一直都是。
@@ -1307,9 +1184,7 @@ void f()
 ```cpp
 const int n = 7;
 int m = 9;
-```
 
-```cpp
 void f()
 {
     array<int, n> a1;
@@ -1317,7 +1192,6 @@ void f()
     // ...
 }
 ```
-
 ##### 强制实施
 
 * 对具有非常量界的数组（C 风格的 VLA）作出标记。
@@ -1338,7 +1212,6 @@ for (auto i = 2; i <= N; ++i) {          // 这是由 x 的
 }                                        // 一段任意长的代码
 // 自此开始，x 应当为 const，不过我们无法在这种风格的代码中做到这点
 ```
-
 ##### 示例，好
 
 ```cpp
@@ -1350,7 +1223,6 @@ const widget x = [&] {
     return val;
 }();
 ```
-
 如果可能的话，应当将条件缩减成一个后续的简单集合（比如一个 `enum`），并避免把选择和初始化相互混合起来。
 
 ##### 强制实施
@@ -1368,8 +1240,9 @@ const widget x = [&] {
 
 ##### 示例，不好
 
-    #define Case break; case   /* 不好 */
-
+```cpp
+#define Case break; case   /* 不好 */
+```
 这个貌似无害的宏会把某个大写的 `C` 替换为小写的 `c` 导致一个严重的控制流错误。
 
 ##### 注解
@@ -1386,10 +1259,10 @@ const widget x = [&] {
 通常，使用花式宏的欲望是过于复杂的设计的标志。
 另外，`＃` 和 `##` 促进了宏的定义和使用：
 
-    #define CAT(a, b) a ## b
-    #define STRINGIFY(a) #a
-
 ```cpp
+#define CAT(a, b) a ## b
+#define STRINGIFY(a) #a
+
 void f(int x, int y)
 {
     string CAT(x, y) = "asdf";   // 不好: 工具难以处理（也很丑陋）
@@ -1397,18 +1270,13 @@ void f(int x, int y)
     // ...
 }
 ```
-
 有使用宏进行低级字符串操作的变通方法。例如：
 
 ```cpp
 string s = "asdf" "lkjh";   // 普通的字符串文字连接
-```
 
-```cpp
 enum E { a, b };
-```
 
-```cpp
 template<int x>
 constexpr const char* stringify()
 {
@@ -1417,16 +1285,13 @@ constexpr const char* stringify()
     case b: return "b";
     }
 }
-```
 
-```cpp
 void f(int x, int y)
 {
     string sx = stringify<x>();
     // ...
 }
 ```
-
 这不像定义宏那样方便，但是易于使用、零开销，并且是类型化的和作用域化的。
 
 将来，静态反射可能会消除对程序文本操作的预处理器的最终需求。
@@ -1447,16 +1312,16 @@ void f(int x, int y)
 
 ##### 示例，不好
 
-    #define PI 3.14
-    #define SQUARE(a, b) (a * b)
-
+```cpp
+#define PI 3.14
+#define SQUARE(a, b) (a * b)
+```
 即便我们并未在 `SQUARE` 中留下这个众所周知的 BUG，也存在多种表现好得多的替代方式；比如：
 
 ```cpp
 constexpr double pi = 3.14;
 template<typename T> T square(T a, T b) { return a * b; }
 ```
-
 ##### 强制实施
 
 见到并非仅用于源代码控制（比如 `#ifdef`）的宏时应当大声尖叫。
@@ -1469,10 +1334,11 @@ template<typename T> T square(T a, T b) { return a * b; }
 
 ##### 示例
 
-    #define forever for (;;)   /* 非常不好 */
+```cpp
+#define forever for (;;)   /* 非常不好 */
 
-    #define FOREVER for (;;)   /* 仍然很邪恶，但至少对人来说是可见的 */
-
+#define FOREVER for (;;)   /* 仍然很邪恶，但至少对人来说是可见的 */
+```
 ##### 强制实施
 
 见到小写的宏时应当大声尖叫。
@@ -1485,10 +1351,11 @@ template<typename T> T square(T a, T b) { return a * b; }
 
 ##### 示例
 
-    #define MYCHAR        /* 不好，最终将会和别人的 MYCHAR 相冲突 */
+```cpp
+#define MYCHAR        /* 不好，最终将会和别人的 MYCHAR 相冲突 */
 
-    #define ZCORP_CHAR    /* 还是不好，但冲突的机会较小 */
-
+#define ZCORP_CHAR    /* 还是不好，但冲突的机会较小 */
+```
 ##### 注解
 
 如果可能就应当避免使用宏：[ES.30](S-expr.md#Res-macros)，[ES.31](S-expr.md#Res-macros2)，以及 [ES.32](S-expr.md#Res-ALL_CAPS)。
@@ -1508,36 +1375,28 @@ template<typename T> T square(T a, T b) { return a * b; }
 
 ##### 示例
 
-    #include <cstdarg>
-
 ```cpp
+#include <cstdarg>
+
 // "severity" 后面跟着以零终结的 char* 列表；将 C 风格字符串写入 cerr
 void error(int severity ...)
 {
     va_list ap;             // 一个持有参数的神奇类型
     va_start(ap, severity); // 参数启动："severity" 是 error() 的第一个参数
-```
 
-```cpp
     for (;;) {
         // 将下一个变量看作 char*；没有检查：经过伪装的强制转换
         char* p = va_arg(ap, char*);
         if (!p) break;
         cerr << p << ' ';
     }
-```
 
-```cpp
     va_end(ap);             // 参数清理（不能忘了这个）
-```
 
-```cpp
     cerr << '\n';
     if (severity) exit(severity);
 }
-```
 
-```cpp
 void use()
 {
     error(7, "this", "is", "an", "error", nullptr);
@@ -1548,46 +1407,36 @@ void use()
     error(7, "this", "is", an, "error"); // 崩溃
 }
 ```
-
 **替代方案**: 重载。模板。变参模板。
 
-    #include <iostream>
-
 ```cpp
+#include <iostream>
+
 void error(int severity)
 {
     std::cerr << '\n';
     std::exit(severity);
 }
-```
 
-```cpp
 template<typename T, typename... Ts>
 constexpr void error(int severity, T head, Ts... tail)
 {
     std::cerr << head;
     error(severity, tail...);
 }
-```
 
-```cpp
 void use()
 {
     error(7); // 不会崩溃！
     error(5, "this", "is", "not", "an", "error"); // 不会崩溃！
-```
 
-```cpp
     std::string an = "an";
     error(7, "this", "is", "not", an, "error"); // 不会崩溃！
-```
 
-```cpp
     error(5, "oh", "no", nullptr); // 编译器报错！不需要 nullptr。
 }
+
 ```
-
-
 ##### 注解
 
 这基本上就是 `printf` 的实现方式。
@@ -1613,43 +1462,28 @@ void use()
 ```cpp
 // 不好: 在子表达式中藏有赋值
 while ((c = getc()) != -1)
-```
 
-```cpp
 // 不好: 在一个子表达式中对两个非局部变量进行了赋值
 while ((cin >> c1, cin >> c2), c1 == c2)
-```
 
-```cpp
 // 有改善，但可能仍然过于复杂
 for (char c1, c2; cin >> c1 >> c2 && c1 == c2;)
-```
 
-```cpp
 // OK: 若 i 和 j 并非别名
 int x = ++i + ++j;
-```
 
-```cpp
 // OK: 若 i != j 且 i != k
 v[i] = v[j] + v[k];
-```
 
-```cpp
 // 不好: 子表达式中“隐藏”了多个赋值
 x = a + (b = f()) + (c = g()) * 7;
-```
 
-```cpp
 // 不好: 依赖于经常被误解的优先级规则
 x = a & b + c * d && e ^ f == 7;
-```
 
-```cpp
 // 不好: 未定义行为
 x = x++ + x++ + ++x;
 ```
-
 这些表达式中有几个是无条件不好的（比如说依赖于未定义行为）。其他的只不过过于复杂和不常见，即便是优秀的程序员匆忙中也可能会误解或者忽略其中的某个问题。
 
 ##### 注解
@@ -1666,23 +1500,16 @@ C++17 收紧了有关求值顺序的规则
 
 ```cpp
 x = k * y + z;             // OK
-```
 
-```cpp
 auto t1 = k * y;           // 不好: 不必要的啰嗦
 x = t1 + z;
-```
 
-```cpp
 if (0 <= x && x < max)   // OK
-```
 
-```cpp
 auto t1 = 0 <= x;        // 不好: 不必要的啰嗦
 auto t2 = x < max;
 if (t1 && t2)            // ...
 ```
-
 ##### 强制实施
 
 很麻烦。多复杂的表达式才能被当成复杂的？把计算写成每条语句一个操作同样是让人混乱的。需要考虑的有：
@@ -1706,18 +1533,14 @@ if (t1 && t2)            // ...
 ```cpp
 const unsigned int flag = 2;
 unsigned int a = flag;
-```
 
-```cpp
 if (a & flag != 0)  // 不好: 含义为 a&(flag != 0)
 ```
-
 注意：我们建议程序员了解算术运算和逻辑运算的优先级表，但应当考虑当按位逻辑运算和其他运算符混合使用时需要采用括号。
 
 ```cpp
 if ((a & flag) != 0)  // OK: 按预期工作
 ```
-
 ##### 注解
 
 你应当了解足够的知识以避免在这样的情况下需要括号：
@@ -1727,7 +1550,6 @@ if (a < 0 || a <= max) {
     // ...
 }
 ```
-
 ##### 强制实施
 
 * 当按位逻辑运算符合其他运算符组合时进行标记。
@@ -1754,73 +1576,45 @@ if (a < 0 || a <= max) {
 void f(int* p, int count)
 {
     if (count < 2) return;
-```
 
-```cpp
     int* q = p + 1;    // 不好
-```
 
-```cpp
     ptrdiff_t d;
     int n;
     d = (p - &n);      // OK
     d = (q - p);       // OK
-```
 
-```cpp
     int n = *p++;      // 不好
-```
 
-```cpp
     if (count < 6) return;
-```
 
-```cpp
     p[4] = 1;          // 不好
-```
 
-```cpp
     p[count - 1] = 2;  // 不好
-```
 
-```cpp
     use(&p[0], 3);     // 不好
 }
 ```
-
 ##### 示例，好
 
 ```cpp
 void f(span<int> a) // 好多了：函数声明中使用了 span
 {
     if (a.size() < 2) return;
-```
 
-```cpp
     int n = a[0];      // OK
-```
 
-```cpp
     span<int> q = a.subspan(1); // OK
-```
 
-```cpp
     if (a.size() < 6) return;
-```
 
-```cpp
     a[4] = 1;          // OK
-```
 
-```cpp
     a[a.size() - 1] = 2;  // OK
-```
 
-```cpp
     use(a.data(), 3);  // OK
 }
 ```
-
 ##### 注解
 
 用变量做下标，对于工具和人类来说都是很难将其验证为安全的。
@@ -1839,7 +1633,6 @@ void f(array<int, 10> a, int pos)
     a[10] = 4;    // 不好（但易于被工具查出） - 没有替代方案，请勿这样做
 }
 ```
-
 ##### 示例，好
 
 使用 `span`：
@@ -1850,9 +1643,7 @@ void f1(span<int, 10> a, int pos) // A1: 将参数类型改为使用 span
     a[pos / 2] = 1; // OK
     a[pos - 1] = 2; // OK
 }
-```
 
-```cpp
 void f2(array<int, 10> arr, int pos) // A2: 增加局部的 span 并使用之
 {
     span<int> a = {arr.data(), pos};
@@ -1860,7 +1651,6 @@ void f2(array<int, 10> arr, int pos) // A2: 增加局部的 span 并使用之
     a[pos - 1] = 2; // OK
 }
 ```
-
 使用 `at()`：
 
 ```cpp
@@ -1870,7 +1660,6 @@ void f3(array<int, 10> a, int pos) // 替代方案 B: 用 at() 进行访问
     at(a, pos - 1) = 2; // OK
 }
 ```
-
 ##### 示例，不好
 
 ```cpp
@@ -1881,7 +1670,6 @@ void f()
         arr[i] = i; // 不好，不能使用非常量索引
 }
 ```
-
 ##### 示例，好
 
 使用 `span`：
@@ -1895,7 +1683,6 @@ void f1()
         av[i] = i;
 }
 ```
-
 使用 `span` 和基于范围的 `for`：
 
 ```cpp
@@ -1908,7 +1695,6 @@ void f1a()
          e = i++;
 }
 ```
-
 使用 `at()` 进行访问：
 
 ```cpp
@@ -1920,7 +1706,6 @@ void f2()
         at(arr, i) = i;
 }
 ```
-
 使用基于范围的 `for`：
 
 ```cpp
@@ -1931,32 +1716,26 @@ void f3()
          e = i++;
 }
 ```
-
 ##### 注解
 
 工具可以提供重写能力，以将涉及动态索引表达式的数组访问替换为使用 `at()` 进行访问：
 
 ```cpp
 static int a[10];
-```
 
-```cpp
 void f(int i, int j)
 {
     a[i + j] = 12;      // 不好，可以重写为 ...
     at(a, i + j) = 12;  // OK - 带有边界检查
 }
 ```
-
 ##### 示例
 
 把数组转变为指针（语言基本上总会这样做），移除了进行检查的机会，因此应当予以避免
 
 ```cpp
 void g(int* p);
-```
 
-```cpp
 void f()
 {
     int a[5];
@@ -1964,30 +1743,22 @@ void f()
     g(&a[0]);    // OK：传递单个对象
 }
 ```
-
 如果要传递数组的话，应该这样：
 
 ```cpp
 void g(int* p, size_t length);  // 老的（危险）代码
-```
 
-```cpp
 void g1(span<int> av); // 好多了：改动了 g()。
-```
 
-```cpp
 void f()
 {
     int a[5];
     span<int> av = a;
-```
 
-```cpp
     g(av.data(), av.size());   // OK, 如果没有其他选择的话
     g1(a);                     // OK - 这里没有退化，而是使用了隐式的 span 构造函数
 }
 ```
-
 ##### 强制实施
 
 * 对任何在指针类型的表达式上进行的产生指针类型的值的算术运算进行标记。
@@ -2016,7 +1787,6 @@ C++17 收紧了有关求值顺序的规则：
 ```cpp
 v[i] = ++i;   //  其结果是未定义的
 ```
-
 一条不错经验法则是，你不应当在一个表达式中两次读取你所写入的值。
 
 ##### 强制实施
@@ -2039,7 +1809,6 @@ C++17 收紧了有关求值顺序的规则，但函数实参求值顺序仍然�
 int i = 0;
 f(++i, ++i);
 ```
-
 在 C++17 之前，其行为是未定义的。因此其行为可能是任何事（比如 `f(2, 2)`）。
 自 C++17 起，中这段代码没有未定义行为，但仍未指定是哪个实参被首先求值。这个调用会是 `f(0, 1)` 或 `f(1, 0)`，但你不知道是哪个。
 
@@ -2051,13 +1820,11 @@ f(++i, ++i);
 f1()->m(f2());          // m(f1(), f2())
 cout << f1() << f2();   // operator<<(operator<<(cout, f1()), f2())
 ```
-
 在 C++17 中，这些例子将按预期工作（自左向右），而赋值则按自右向左求值（`=` 正是自右向左绑定的）
 
 ```cpp
 f1() = f2();    // C++14 中为未定义行为；C++17 中 f2() 在 f1() 之前求值
 ```
-
 ##### 强制实施
 
 可以由优秀的分析器检测出来。
@@ -2074,27 +1841,22 @@ f1() = f2();    // C++14 中为未定义行为；C++17 中 f2() 在 f1() 之前�
 for (int m = 1; m <= 12; ++m)   // 请勿如此: 魔法常量 12
     cout << month[m] << '\n';
 ```
-
 不是所有人都知道一年中有 12 个月份，号码是 1 到 12。更好的做法是：
 
 ```cpp
 // 月份索引值为 1..12
 constexpr int first_month = 1;
 constexpr int last_month = 12;
-```
 
-```cpp
 for (int m = first_month; m <= last_month; ++m)   // 好多了
     cout << month[m] << '\n';
 ```
-
 更好的做法是，不要暴露常量：
 
 ```cpp
 for (auto m : month)
     cout << m << '\n';
 ```
-
 ##### 强制实施
 
 标记代码中的字面量。让 `0`，`1`，`nullptr`，`\n'`，`""`，以及某个确认列表中的其他字面量通过检查。
@@ -2113,9 +1875,7 @@ for (auto m : month)
 double d = 7.9;
 int i = d;    // 不好: 窄化: i 变为了 7
 i = (int) d;  // 不好: 我们打算声称这样的做法仍然不够明确
-```
 
-```cpp
 void f(int x, long y, double d)
 {
     char c1 = x;   // 不好: 窄化
@@ -2123,7 +1883,6 @@ void f(int x, long y, double d)
     char c3 = d;   // 不好: 窄化
 }
 ```
-
 ##### 注解
 
 指导方针支持库提供了一个 `narrow_cast` 操作，用以指名发生窄化是可接受的，以及一个 `narrow`（“窄化判定”）当窄化将会损失合法值时将会抛出一个异常：
@@ -2132,20 +1891,16 @@ void f(int x, long y, double d)
 i = gsl::narrow_cast<int>(d);   // OK (明确需要): 窄化: i 变为了 7
 i = gsl::narrow<int>(d);        // OK: 抛出 narrowing_error
 ```
-
 其中还包含了一些含有损失的算术强制转换，比如从负的浮点类型到无符号整型类型的强制转换：
 
 ```cpp
 double d = -7.9;
 unsigned u = 0;
-```
 
-```cpp
 u = d;                               // 不好：发生窄化
 u = gsl::narrow_cast<unsigned>(d);   // OK (明确需要): u 变为了 4294967289
 u = gsl::narrow<unsigned>(d);        // OK：抛出 narrowing_error
 ```
-
 ##### 注解
 
 这条规则不适用于[按语境转换为 bool](https://en.cppreference.com/w/cpp/language/implicit_conversion#Contextual_conversions) 的情形：
@@ -2154,7 +1909,6 @@ u = gsl::narrow<unsigned>(d);        // OK：抛出 narrowing_error
 if (ptr) do_something(*ptr);   // OK：ptr 被用作条件
 bool b = ptr;                  // 不好：发生窄化
 ```
-
 ##### 强制实施
 
 优良的分析器可以检测到所有的窄化转换。不过，对所有的窄化转换都进行标记将带来大量的误报。建议的做法是：
@@ -2182,7 +1936,6 @@ void f(char*);
 f(0);         // 调用 f(int)
 f(nullptr);   // 调用 f(char*)
 ```
-
 ##### 强制实施
 
 对用作指针的 `0` 和 `NULL` 进行标记。可以用简单的程序变换来达成这种变换。
@@ -2201,26 +1954,22 @@ auto p = (long*)&d;
 auto q = (long long*)&d;
 cout << d << ' ' << *p << ' ' << *q << '\n';
 ```
-
 你觉得这段代码会打印出什么呢？结果最好由实现定义。我得到的是
 
 ```cpp
 2 0 4611686018427387904
 ```
-
 加上这些
 
 ```cpp
 *q = 666;
 cout << d << ' ' << *p << ' ' << *q << '\n';
 ```
-
 得到的是
 
 ```cpp
 3.29048e-321 666 666
 ```
-
 奇怪吗？我很庆幸程序没有崩溃掉。
 
 ##### 注解
@@ -2284,9 +2033,7 @@ cout << d << ' ' << *p << ' ' << *q << '\n';
 ```cpp
 class B { /* ... */ };
 class D { /* ... */ };
-```
 
-```cpp
 template<typename D> D* upcast(B* pb)
 {
     D* pd0 = pb;                        // 错误：不存在从 B* 向 D* 的隐式转换
@@ -2297,7 +2044,6 @@ template<typename D> D* upcast(B* pb)
     // ...
 }
 ```
-
 这个例子是从真实世界的 BUG 合成的，其中 `D` 曾经派生于 `B`，但某个人重构了继承层次。
 C 风格的强制转换很危险，因为它可以进行任何种类的转换，使我们丧失了今后受保护不犯错的机会。
 
@@ -2310,7 +2056,6 @@ C 风格的强制转换很危险，因为它可以进行任何种类的转换，
 double d {some_float};
 int64_t i {some_int32};
 ```
-
 这样做明确了有意进行类型转换，而且同样避免了
 发生可能导致精度损失的结果的类型转换。（比如说，
 试图用这种风格来从 `double` 初始化 `float` 会导致
@@ -2322,9 +2067,8 @@ int64_t i {some_int32};
 
 ```cpp
 auto p = reinterpret_cast<Device_register>(0x800);  // 天生危险
+
 ```
-
-
 ##### 强制实施
 
 * 对包括向 `void` 在内的所有 C 风格强制转换进行标记。
@@ -2346,27 +2090,20 @@ void f(const int& x)
 {
     const_cast<int&>(x) = 42;   // 不好
 }
-```
 
-```cpp
 static int i = 0;
 static const int j = 0;
-```
 
-```cpp
 f(i); // 暗藏的副作用
 f(j); // 未定义的行为
 ```
-
 ##### 示例
 
 有时候，你可能倾向于借助 `const_cast` 来避免代码重复，比如两个访问函数仅在是否 `const` 上有区别而实现相似的情况。例如：
 
 ```cpp
 class Bar;
-```
 
-```cpp
 class Foo {
 public:
     // 不好，逻辑重复
@@ -2374,9 +2111,7 @@ public:
     {
         /* 获取 my_bar 的非 const 引用前后的复杂逻辑 */
     }
-```
 
-```cpp
     const Bar& get_bar() const
     {
         /* 获取 my_bar 的 const 引用前后的相同的复杂逻辑 */
@@ -2385,7 +2120,6 @@ private:
     Bar my_bar;
 };
 ```
-
 应当改为共享实现。通常可以直接让非 `const` 函数来调用 `const` 函数。不过当逻辑复杂的时候这可能会导致下面这样的模式，仍然需要借助于 `const_cast`：
 
 ```cpp
@@ -2404,7 +2138,6 @@ private:
     Bar my_bar;
 };
 ```
-
 虽然这个模式如果恰当应用的话是安全的（因为调用方必然以一个非 `const` 对象来开始），但这并不理想，因为其安全性无法作为检查工具的规则而自动强制实施。
 
 换种方式，可以优先将公共代码放入一个公共辅助函数中，并将之作为模板以使其推断 `const`。这完全不会用到 `const_cast`：
@@ -2416,15 +2149,12 @@ public:                         // 好
     const Bar& get_bar() const { return get_bar_impl(*this); }
 private:
     Bar my_bar;
-```
 
-```cpp
     template<class T>           // 好，推断出 T 是 const 还是非 const
     static auto& get_bar_impl(T& t)
         { /* 获取 my_bar 的可能为 const 的引用前后的复杂逻辑 */ }
 };
 ```
-
 注意：不要在模板中编写大型的非待决代码，因为它将导致代码爆炸。例如，进一步改进是当 `get_bar_impl` 的全部或部分代码是非待决代码时将之重构移出到一个公共的非模板函数中去，这可能会使代码大小显著变小。
 
 ##### 例外
@@ -2442,9 +2172,7 @@ private:
 
 ```cpp
 int compute(int x); // 为 x 计算一个值；假设这是昂贵的
-```
 
-```cpp
 class Cache {   // 为 int->int 操作实现一种高速缓存的某个类型
 public:
     pair<bool, int> find(int x) const;   // 有针对 x 的值吗？
@@ -2453,9 +2181,7 @@ public:
 private:
     // ...
 };
-```
 
-```cpp
 class X {
 public:
     int get_val(int x)
@@ -2471,7 +2197,6 @@ private:
     Cache cache;
 };
 ```
-
 这里的 `get_val()` 逻辑上是个常量，因此我们想使其成为 `const` 成员。
 为此我们仍然需要改动 `cache`，因此人们有时候会求助于 `const_cast`：
 
@@ -2491,7 +2216,6 @@ private:
     Cache cache;
 };
 ```
-
 幸运的是，有一种更好的方案：
 将 `cache` 称为即便对于 `const` 对象来说也是可改变的：
 
@@ -2511,7 +2235,6 @@ private:
     mutable Cache cache;
 };
 ```
-
 另一种替代方案是存储指向 `cache` 的指针：
 
 ```cpp
@@ -2530,7 +2253,6 @@ private:
     unique_ptr<Cache> cache;
 };
 ```
-
 这个方案最灵活，但需要显式进行 `*cache` 的构造和销毁
 （最可能发生于 `X` 的构造函数和析构函数中）。
 
@@ -2552,12 +2274,9 @@ private:
 ```cpp
 for (auto& x : v)      // 打印 v 的所有元素
     cout << x << '\n';
-```
 
-```cpp
 auto p = find(v, x);   // 在 v 中寻找 x
 ```
-
 ##### 强制实施
 
 查找显式的范围检查，并启发式地给出替代方案建议。
@@ -2582,9 +2301,7 @@ auto p = find(v, x);   // 在 v 中寻找 x
 
 ```cpp
 void sink(X&& x);   // sink 接收 x 的所有权
-```
 
-```cpp
 void user()
 {
     X x;
@@ -2592,18 +2309,13 @@ void user()
     sink(x);
     // OK: sink 接收了 x 的内容，x 随即必须假定为空
     sink(std::move(x));
-```
 
-```cpp
     // ...
-```
 
-```cpp
     // 可能是个错误
     use(x);
 }
 ```
-
 通常来说，`std::move()` 都用做某个 `&&` 形参的实参。
 而这点之后，应当假定对象已经被移走（参见 [C.64](S-class.md#Rc-move-semantic)），而直到首次向它设置某个新值之前，请勿再次读取它的状态。
 
@@ -2611,31 +2323,22 @@ void user()
 void f()
 {
     string s1 = "supercalifragilisticexpialidocious";
-```
 
-```cpp
     string s2 = s1;             // ok, 接收了一个副本
     assert(s1 == "supercalifragilisticexpialidocious");  // ok
-```
 
-```cpp
     // 不好, 如果你打算保留 s1 的值的话
     string s3 = move(s1);
-```
 
-```cpp
     // 不好, assert 很可能会失败, s1 很可能被改动了
     assert(s1 == "supercalifragilisticexpialidocious");
 }
 ```
-
 ##### 示例
 
 ```cpp
 void sink(unique_ptr<widget> p);  // 将 p 的所有权传递给 sink()
-```
 
-```cpp
 void f()
 {
     auto w = make_unique<widget>();
@@ -2645,7 +2348,6 @@ void f()
     sink(w);    // 错误: unique_ptr 经过严格设计，你无法复制它
 }
 ```
-
 ##### 注解
 
 `std::move()` 经过伪装的向 `&&` 的强制转换；其自身并不会移动任何东西，但会把具名的对象标记为可被移动的候选者。
@@ -2666,7 +2368,6 @@ vector<int> make_vector()
     return std::move(result);       // 不好; 直接写 "return result;" 即可
 }
 ```
-
 绝不要写 `return move(local_variable);`，这是因为语言已经知道这个变量是移动的候选了。
 在这段代码中用 `move` 并不会带来帮助，而且可能实际上是有害的，因为它创建了局部变量的一个额外引用别名，而在某些编译器中这回对 RVO（返回值优化）造成影响。
 
@@ -2676,7 +2377,6 @@ vector<int> make_vector()
 ```cpp
 vector<int> v = std::move(make_vector());   // 不好; 这个 std::move 完全是多余的
 ```
-
 绝不在返回值上使用 `move`，如 `x = move(f());`，其中的 `f` 按值返回。
 语言已经知道返回值是临时对象而且可以被移动。
 
@@ -2689,9 +2389,7 @@ void mover(X&& x)
     call_something(std::forward<X>(x));   // 不好, 请勿对右值引用 std::forward
     call_something(x);                    // 可疑  为什么不用std:: move?
 }
-```
 
-```cpp
 template<class T>
 void forwarder(T&& t)
 {
@@ -2700,7 +2398,6 @@ void forwarder(T&& t)
     call_something(t);                    // 可疑, 为什么不用 std::forward?
 }
 ```
-
 ##### 强制实施
 
 * 对于 `std::move(x)` 的使用，当 `x` 是右值，或者语言已经将其当做右值，这包括 `return std::move(local_variable);` 以及在按值返回的函数上的 `std::move(f())`，进行标记
@@ -2732,7 +2429,6 @@ void f(int n)
     delete[] p;
 }
 ```
-
 `...` 部分中的代码可能导致 `delete` 永远不会发生。
 
 **参见**: [R: 资源管理](S-resource.md#S-resource)
@@ -2757,7 +2453,6 @@ void f(int n)
     delete p;   // 错误: 仅仅删除了对象 p，而并未删除数组 p[]
 }
 ```
-
 ##### 注解
 
 这个例子不仅像上前一个例子一样违反了[禁止裸 `new` 规则](S-expr.md#Res-new)，它还有更多的问题。
@@ -2784,7 +2479,6 @@ void f()
     if (0 < &a1[5] - &a2[7]) {}   // 不好: 未定义
 }
 ```
-
 ##### 注解
 
 这个例子中有许多问题。
@@ -2806,15 +2500,11 @@ void f()
 ```cpp
 class Shape { /* ... */ };
 class Circle : public Shape { /* ... */ Point c; int r; };
-```
 
-```cpp
 Circle c {{ "{{" }}0, 0}, 42};
 Shape s {c};    // 仅复制构造了 Circle 中的 Shape 部分
 s = c;          // 仅复制赋值了 Circle 中的 Shape 部分
-```
 
-```cpp
 void assign(const Shape& src, Shape& dest)
 {
     dest = src;
@@ -2824,7 +2514,6 @@ assign(c, c2);   // 噢，传递的并不是整个状态
 assert(c == c2); // 如果提供复制操作，就也得提供比较操作，
                  //   但这里很可能返回 false
 ```
-
 这样的结果是无意义的，因为不会把中心和半径从 `c` 复制给 `s`。
 针对这个的第一条防线是[将基类 `Shape` 定义为不允许这样做](S-class.md#Rc-copy-virtual)。
 
@@ -2840,16 +2529,13 @@ class Smiley : public Circle {
     Circle copy_circle();
     // ...
 };
-```
 
-```cpp
 Smiley sm { /* ... */ };
 ```
     Circle c1 {sm};  // 理想情况下由 Circle 的定义所禁止
 ```cpp
 Circle c2 {sm.copy_circle()};
 ```
-
 ##### 强制实施
 
 针对切片给出警告。
@@ -2874,23 +2560,18 @@ void use(char ch, int i, double d, char* p, long long lng)
     int x2 = int{d};      // 错误：double->int 窄化；如果需要的话应使用强制转换
     int x3 = int{p};      // 错误：指针->int；如果确实需要的话应使用 reinterpret_cast
     int x4 = int{lng};    // 错误：long long->int 窄化；如果需要的话应使用强制转换
-```
 
-```cpp
     int y1 = int(ch);     // OK，但多余
     int y2 = int(d);      // 不好：double->int 窄化；如果需要的话应使用强制转换
     int y3 = int(p);      // 不好：指针->int；如果确实需要的话应使用 reinterpret_cast
     int y4 = int(lng);    // 不好：long long->int 窄化；如果需要的话应使用强制转换
-```
 
-```cpp
     int z1 = (int)ch;     // OK，但多余
     int z2 = (int)d;      // 不好：double->int 窄化；如果需要的话应使用强制转换
     int z3 = (int)p;      // 不好：指针->int；如果确实需要的话应使用 reinterpret_cast
     int z4 = (int)lng;    // 不好：long long->int 窄化；如果需要的话应使用强制转换
 }
 ```
-
 整数和指针之间的转换，在使用 `T(e)` 和 `(T)e` 时是由实现定义的，
 而且在不同整数和指针大小的平台之间不可移植。
 
@@ -2904,12 +2585,9 @@ void use(char ch, int i, double d, char* p, long long lng)
 
 ```cpp
 complex<double> f(complex<double>);
-```
 
-```cpp
 auto z = f({2*pi,1});
 ```
-
 ##### 注解
 
 对象构造语法是最通用的[初始化式语法](S-expr.md#Res-list)。
@@ -2924,13 +2602,11 @@ vector<string> vs {10};                           // 十个空字符串
 vector<int> vi1 {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};  // 十个元素 1..10
 vector<int> vi2 {10};                             // 一个值为 10 的元素
 ```
-
 如何得到包含十个默认初始化的 `int` 的 `vector`？
 
 ```cpp
 vector<int> v3(10); // 十个值为 0 的元素
 ```
-
 使用 `()` 而不是 `{}` 作为元素数量是一种约定（源于 1980 年代早期），很难改变，
 但仍然是一个设计错误：对于元素类型与元素数量可能发生混淆的容器，必须解决
 其中的歧义。
@@ -2941,9 +2617,7 @@ vector<int> v3(10); // 十个值为 0 的元素
 
 ```cpp
 struct Count { int n; };
-```
 
-```cpp
 template<typename T>
 class Vector {
 public:
@@ -2951,14 +2625,11 @@ public:
     Vector(initializer_list<T> init);    // init.size() 个元素
     // ...
 };
-```
 
-```cpp
 Vector<int> v1{10};
 Vector<int> v2{Count{10}};
 Vector<Count> v3{Count{10}};    // 这里仍有一个很小的问题
 ```
-
 剩下的主要问题就是为 `Count` 找个合适的名字了。
 
 ##### 强制实施
@@ -2996,20 +2667,15 @@ void f()
 {
     int x = 0;
     int* p = &x;
-```
 
-```cpp
     if (condition()) {
         int y = 0;
         p = &y;
     } // p 失效
-```
 
-```cpp
     *p = 42;            // 不好，若走了上面的分支则 p 无效
 }
 ```
-
 为解决这个问题，要么应当扩展指针打算指代的这个对象的生存期，要么应当缩短指针的生存期（将解引用移动到所指代的对象生存期结束之前进行）。
 
 ```cpp
@@ -3017,20 +2683,15 @@ void f1()
 {
     int x = 0;
     int* p = &x;
-```
 
-```cpp
     int y = 0;
     if (condition()) {
         p = &y;
     }
-```
 
-```cpp
     *p = 42;            // OK，p 可指向 x 或 y，而它们都仍在作用域中
 }
 ```
-
 不幸的是，大多数无效指针问题都更加难于定位且更加难于解决。
 
 ##### 示例
@@ -3041,7 +2702,6 @@ void f(int* p)
     int x = *p; // 不好：如何确定 p 是否有效？
 }
 ```
-
 有大量的这种代码存在。
 它们大多数都能工作（经过了大量的测试），但其各自是很难确定 `p` 是否可能为 `nullptr` 的。
 后果就是，这同样是错误的一大来源。
@@ -3056,7 +2716,6 @@ void f1(int* p) // 处理 nullptr
     int x = *p;
 }
 ```
-
 测试 `nullptr` 的做法有两个潜在的问题：
 
 * 当遇到 `nullptr` 时应当做什么并不总是明确的
@@ -3071,7 +2730,6 @@ void f2(int* p) // 声称 p 不应当为 nullptr
     int x = *p;
 }
 ```
-
 这样，仅当打开了断言检查时才会有所耗费，而且会向编译器/分析器提供有用的信息。
 当 C++ 出现契约的直接支持后，还可以做的更好：
 
@@ -3082,7 +2740,6 @@ void f3(int* p) // 声称 p 不应当为 nullptr
     int x = *p;
 }
 ```
-
 或者，还可以使用 `gsl::not_null` 来保证 `p` 不为 `nullptr`。
 
 ```cpp
@@ -3091,7 +2748,6 @@ void f(not_null<int*> p)
     int x = *p;
 }
 ```
-
 这些只是关于 `nullptr` 的处理办法。
 要知道还有其他出现无效指针的方式。
 
@@ -3102,9 +2758,7 @@ void f(int* p)  // 老代码，没使用 owner
 {
     delete p;
 }
-```
 
-```cpp
 void g()        // 老代码：使用了裸 new
 {
     auto q = new int{7};
@@ -3112,7 +2766,6 @@ void g()        // 老代码：使用了裸 new
     int x = *q; // 不好：解引用了无效指针
 }
 ```
-
 ##### 示例
 
 ```cpp
@@ -3124,7 +2777,6 @@ void f()
     int x = *p; // 不好：解引用了潜在的无效指针
 }
 ```
-
 ##### 强制实施
 
 本条规则属于[生存期安全性剖面配置](S-profile.md#SS-lifetime)
@@ -3165,7 +2817,6 @@ void use(int n)
     }
 }
 ```
-
 要好于：
 
 ```cpp
@@ -3177,7 +2828,6 @@ void use2(int n)
         // ...
 }
 ```
-
 ##### 强制实施
 
 对以 `if`-`then`-`else` 链条（仅）和常量进行比较的情况进行标记。
@@ -3193,35 +2843,24 @@ void use2(int n)
 ```cpp
 for (gsl::index i = 0; i < v.size(); ++i)   // 不好
     cout << v[i] << '\n';
-```
 
-```cpp
 for (auto p = v.begin(); p != v.end(); ++p)   // 不好
     cout << *p << '\n';
-```
 
-```cpp
 for (auto& x : v)    // OK
     cout << x << '\n';
-```
 
-```cpp
 for (gsl::index i = 1; i < v.size(); ++i) // 接触了两个元素：无法作为范围式的 for
     cout << v[i] + v[i - 1] << '\n';
-```
 
-```cpp
 for (gsl::index i = 0; i < v.size(); ++i) // 可能具有副作用：无法作为范围式的 for
     cout << f(v, &v[i]) << '\n';
-```
 
-```cpp
 for (gsl::index i = 0; i < v.size(); ++i) { // 循环体中混入了循环变量：无法作为范围式 for
     if (i % 2 != 0)
         cout << v[i] << '\n'; // 输出奇数元素
 }
 ```
-
 人类或优良的静态分析器也许可以确定，其实在 `f(v, &v[i])` 中的 `v` 的上并不真的存在副作用，因此这个循环可以被重写。
 
 在循环体中“混入循环变量”的情况通常是最好进行避免的。
@@ -3233,19 +2872,16 @@ for (gsl::index i = 0; i < v.size(); ++i) { // 循环体中混入了循环变量
 ```cpp
 for (string s : vs) // ...
 ```
-
 这将会对 `vs` 中的每个元素复制给 `s`。这样好一点：
 
 ```cpp
 for (string& s : vs) // ...
 ```
-
 更好的做法是，当循环变量不会被修改或复制时：
 
 ```cpp
 for (const string& s : vs) // ...
 ```
-
 ##### 强制实施
 
 查看循环，如果一个传统的循环仅会查看序列中的各个元素，而且其对这些元素所做的事中没有发生副作用，则将该循环重写为范围式的 `for` 循环。
@@ -3263,7 +2899,6 @@ for (gsl::index i = 0; i < vec.size(); i++) {
     // 干活
 }
 ```
-
 ##### 示例，不好
 
 ```cpp
@@ -3273,7 +2908,6 @@ while (i < vec.size()) {
     i++;
 }
 ```
-
 ##### 强制实施
 
 ???
@@ -3292,7 +2926,6 @@ for (; wait_for_event(); ++events) {  // 不好，含糊
     // ...
 }
 ```
-
 这个“事件循环”会误导人，计数器 `events` 跟循环条件（`wait_for_event()`）并没有任何关系。
 更好的做法是
 
@@ -3303,7 +2936,6 @@ while (wait_for_event()) {      // 更好
     // ...
 }
 ```
-
 ##### 强制实施
 
 对和 `for` 的条件不相关的 `for` 初始化式和 `for` 增量部分进行标记。
@@ -3328,7 +2960,6 @@ do {
     // ...
 } while (x < 0);
 ```
-
 ##### 注解
 
 确实有一些天才的例子中，`do` 语句是更简洁的方案，但有问题的更多。
@@ -3357,7 +2988,6 @@ for (int i = 0; i < imax; ++i)
 finished:
 // ...
 ```
-
 ##### 示例，不好
 
 有相当数量的代码采用 C 风格的 goto-exit 惯用法：
@@ -3374,7 +3004,6 @@ exit:
     // ... 公共的清理代码 ...
 }
 ```
-
 这是对析构函数的一种专门模仿。
 应当将资源声明为带有清理的析构函数的包装类。
 如果你由于某种原因无法用析构函数来处理所使用的各个变量的清理工作，
@@ -3407,7 +3036,6 @@ case 2 :
     break;
 }
 ```
-
 ##### 替代方案
 
 通常，需要 `break` 的循环都是作为一个函数（算法）的良好候选者，其 `break` 将会变为 `return`。
@@ -3426,9 +3054,7 @@ void use1()
     }
     /* 然后对 value 做些事 */
 }
-```
 
-```cpp
 // 这样更好：创建一个函数使其从循环中返回
 T search(const std::vector<T> &vec)
 {
@@ -3437,9 +3063,7 @@ T search(const std::vector<T> &vec)
     }
     return T(); // 默认值
 }
-```
 
-```cpp
 void use2()
 {
     std::vector<T> vec = {/* 初始化为一些值 */};
@@ -3447,7 +3071,6 @@ void use2()
     /* 然后对 value 做些事 */
 }
 ```
-
 通常，使用 `continue` 的循环都可以等价且同样简洁地用 `if` 语句来表达。
 
 ```cpp
@@ -3457,16 +3080,13 @@ for (int item : vec) { // 不好
     if (item > 10) continue;
     /* 对 item 做些事 */
 }
-```
 
-```cpp
 for (int item : vec) { // 好
     if (item%2 != 0 && item != 5 && item <= 10) {
         /* 对 item 做些事 */
     }
 }
 ```
-
 ##### 注解
 
 如果你确实要打断一个循环，使用 `break` 通常比使用诸如[修改循环变量](S-expr.md#Res-loop-counter)或 [`goto`](S-expr.md#Res-goto) 等其他方案更好：
@@ -3498,7 +3118,6 @@ case Error:
     break;
 }
 ```
-
 单个语句带有多个 `case` 标签是可以的：
 
 ```cpp
@@ -3510,7 +3129,6 @@ case 'f':
     break;
 }
 ```
-
 在 `case` 标签中使用返回语句也是可以的：
 
 ```cpp
@@ -3523,7 +3141,6 @@ case 'c':
     return 3;
 }
 ```
-
 ##### 例外
 
 在罕见的直落被视为合适行为的情况中。应当明确标示，并使用 `[[fallthrough]]` 标注：
@@ -3541,7 +3158,6 @@ case Error:
     break;
 }
 ```
-
 ##### 注解
 
 ##### 强制实施
@@ -3560,9 +3176,7 @@ case Error:
 
 ```cpp
 enum E { a, b, c, d };
-```
 
-```cpp
 void f1(E x)
 {
     switch (x) {
@@ -3578,7 +3192,6 @@ void f1(E x)
     }
 }
 ```
-
 此处很明显有一种默认的动作，而情况 `a` 和 `b` 则是特殊情况。
 
 ##### 示例
@@ -3602,7 +3215,6 @@ void f2(E x)
     }
 }
 ```
-
 如果没有 `default` 的话，维护者以及编译器可能会合理地假定你有意处理所有情况：
 
 ```cpp
@@ -3619,7 +3231,6 @@ void f2(E x)
     }
 }
 ```
-
 你是忘记了情况 `d` 还是故意遗漏了它？
 当有人向枚举中添加一种情况，而又未能对每个针对这些枚举符的 `switch` 中添加时，
 容易出现这种遗忘 `case` 的情况。
@@ -3646,7 +3257,6 @@ void f()
     // ...
 }
 ```
-
 这里声明了一个无名的 `lock_guard` 对象，它将在分号处立刻离开作用域。
 这并不是一种少见的错误。
 特别是，这个特别的例子会导致很难发觉的竞争条件。
@@ -3670,15 +3280,12 @@ void f()
 ```cpp
 for (i = 0; i < max; ++i);   // 不好: 空语句很容易被忽略
 v[i] = f(v[i]);
-```
 
-```cpp
 for (auto x : v) {           // 好多了
     // 空
 }
 v[i] = f(v[i]);
 ```
-
 ##### 强制实施
 
 对并非块语句且不包含注释的空语句进行标记。
@@ -3695,17 +3302,13 @@ v[i] = f(v[i]);
 for (int i = 0; i < 10; ++i) {
     // 未改动 i -- ok
 }
-```
 
-```cpp
 for (int i = 0; i < 10; ++i) {
     //
     if (/* 某种情况 */) ++i; // 不好
     //
 }
-```
 
-```cpp
 bool skip = false;
 for (int i = 0; i < 10; ++i) {
     if (skip) { skip = false; continue; }
@@ -3714,7 +3317,6 @@ for (int i = 0; i < 10; ++i) {
     //
 }
 ```
-
 ##### 强制实施
 
 如果变量在循环控制的重复表达式和循环体中都潜在地进行更新（存在非 `const` 使用），则进行标记。
@@ -3738,7 +3340,6 @@ if (p) { ... }            // 好
 if (p != 0) { ... }       // !=0 是多余的；不好：不要对指针用 0
 if (p != nullptr) { ... } // !=nullptr 是多余的，不建议如此
 ```
-
 通常，`if (p)` 可解读为“如果 `p` 有效”，这正是程序员意图的直接表达，
 而 `if (p != nullptr)` 则只是一种啰嗦的变通写法。
 
@@ -3748,12 +3349,9 @@ if (p != nullptr) { ... } // !=nullptr 是多余的，不建议如此
 
 ```cpp
 if (auto pc = dynamic_cast<Circle>(ps)) { ... } // 执行是按照 ps 指向某种 Circle 来进行的，好
-```
 
-```cpp
 if (auto pc = dynamic_cast<Circle>(ps); pc != nullptr) { ... } // 不建议如此
 ```
-
 ##### 示例
 
 要注意，条件中会实施向 `bool` 的隐式转换。
@@ -3762,7 +3360,6 @@ if (auto pc = dynamic_cast<Circle>(ps); pc != nullptr) { ... } // 不建议如�
 ```cpp
 for (string s; cin >> s; ) v.push_back(s);
 ```
-
 这里会执行 `istream` 的 `operator bool()`。
 
 ##### 注解
@@ -3781,7 +3378,6 @@ void f(int i)
     // ...
 }
 ```
-
 一定要记住整数可以有超过两个值。
 
 ##### 示例，不好
@@ -3791,7 +3387,6 @@ void f(int i)
 ```cpp
 if(strcmp(p1, p2)) { ... }   // 这两个 C 风格的字符串相等吗？（错误！）
 ```
-
 是一种常见的新手错误。
 如果使用 C 风格的字符串，那么就必须好好了解 `<cstring>` 中的函数。
 即便冗余地写为
@@ -3799,7 +3394,6 @@ if(strcmp(p1, p2)) { ... }   // 这两个 C 风格的字符串相等吗？（错
 ```cpp
 if(strcmp(p1, p2) != 0) { ... }   // 这两个 C 风格的字符串相等吗？（错误！）
 ```
-
 也不会有效果。
 
 ##### 注解
@@ -3812,7 +3406,6 @@ if (!p) { ... }           // 好
 if (p == 0) { ... }       // ==0 是多余的；不好：不要对指针用 0
 if (p == nullptr) { ... } // ==nullptr 是多余的，不建议如此
 ```
-
 ##### 强制实施
 
 容易，仅需检查条件中多余的 `!=` 和 `==` 的使用即可。
@@ -3832,14 +3425,11 @@ if (p == nullptr) { ... } // ==nullptr 是多余的，不建议如此
 ```cpp
 int x = -3;
 unsigned int y = 7;
-```
 
-```cpp
 cout << x - y << '\n';  // 无符号结果，可能是 4294967286
 cout << x + y << '\n';  // 无符号结果：4
 cout << x * y << '\n';  // 无符号结果，可能是 4294967275
 ```
-
 在更实际的例子中，这种问题更难于被发现。
 
 ##### 注解
@@ -3865,7 +3455,6 @@ cout << x * y << '\n';  // 无符号结果，可能是 4294967275
 unsigned char x = 0b1010'1010;
 unsigned char y = ~x;   // y == 0b0101'0101;
 ```
-
 ##### 注解
 
 无符号类型对于模算术也很有用。
@@ -3896,9 +3485,7 @@ T subtract(T x, T2 y)
 {
     return x - y;
 }
-```
 
-```cpp
 void test()
 {
     int s = 5;
@@ -3911,7 +3498,6 @@ void test()
     cout << subtract(us, s + 2) << '\n';  // 4294967294
 }
 ```
-
 我们这次非常明确发生了什么。
 但要是你见到 `us - (s + 2)` 或者 `s += 2; ...; us - s` 时，你确实能够预计到打印的结果将是 `4294967294` 吗？
 
@@ -3933,17 +3519,12 @@ for (int i = 0; i < 10; ++i) a[i] = i;
 vector<int> v(10);
 // 比较有符号和无符号数；有些编译器会警告，但我们不能警告
 for (gsl::index i = 0; i < v.size(); ++i) v[i] = i;
-```
 
-```cpp
 int a2[-2];         // 错误：负的大小
-```
 
-```cpp
 // OK，但 int 的数值（4294967294）过大，应当会造成一个异常
 vector<int> v2(-2);
 ```
-
 使用 `gsl::index` 作为下标类型；[参见 ES.107](S-expr.md#Res-subscripts)。
 
 ##### 强制实施
@@ -3966,30 +3547,23 @@ vector<int> v2(-2);
 ```cpp
 int a[10];
 a[10] = 7;   // 不好，数组边界上溢出
-```
 
-```cpp
 for (int n = 0; n <= 10; ++n)
     a[n] = 9;   // 不好，数组边界上溢出
 ```
-
 ##### 示例，不好
 
 ```cpp
 int n = numeric_limits<int>::max();
 int m = n + 1;   // 不好，数值上溢出
 ```
-
 ##### 示例，不好
 
 ```cpp
 int area(int h, int w) { return h * w; }
-```
 
-```cpp
 auto a = area(10'000'000, 100'000'000);   // 不好，数值上溢出
 ```
-
 ##### 例外
 
 如果你确实需要模算术的话就使用无符号类型。
@@ -4011,14 +3585,11 @@ auto a = area(10'000'000, 100'000'000);   // 不好，数值上溢出
 ```cpp
 int a[10];
 a[-2] = 7;   // 不好
-```
 
-```cpp
 int n = 101;
 while (n--)
     a[n - 1] = 9;   // 不好（两次）
 ```
-
 ##### 例外
 
 如果你确实需要模算术的话就使用无符号类型。
@@ -4046,7 +3617,6 @@ int divide(int a, int b)
     return a / b;
 }
 ```
-
 ##### 示例，好
 
 ```cpp
@@ -4056,16 +3626,13 @@ int divide(int a, int b)
     Expects(b != 0);
     return a / b;
 }
-```
 
-```cpp
 double divide(double a, double b)
 {
     // 好, 通过换为使用 double 来处置
     return a / b;
 }
 ```
-
 **替代方案**: 对于可以负担一些开销的关键应用，可以使用带有范围检查的整数和/或浮点类型。
 
 ##### 强制实施
@@ -4090,7 +3657,6 @@ int i1 = -2;
 unsigned int u2 = i1;   // 合法：u2 的值为 4294967294
 int i2 = u2;            // 合法：i2 的值为 -2
 ```
-
 真实代码中很难找出这样的（完全合法的）语法构造的问题，而它们是许多真实世界错误的来源。
 考虑：
 
@@ -4101,7 +3667,6 @@ int height;
 cin >> height;
 auto a = area(height, 2);   // 当输入为 -2 时 a 为 4294967292
 ```
-
 记住把 `-1` 赋值给 `unsigned int` 会变成最大的 `unsigned int`。
 而且，由于无符号算术是模算术，其乘法并不会溢出，而是会发生回绕。
 
@@ -4112,7 +3677,6 @@ unsigned max = 100000;    // “不小心写错了”，应该写 10'000
 unsigned short x = 100;
 while (x < max) x += 100; // 无限循环
 ```
-
 要是 `x` 是个有符号的 `short` 的话，我们就会得到有关溢出的未定义行为的警告了。
 
 ##### 替代方案
@@ -4130,17 +3694,12 @@ struct Positive {
     Positive(int x) :val{x} { Assert(0 < x); }
     operator int() { return val; }
 };
-```
 
-```cpp
 int f(Positive arg) { return arg; }
-```
 
-```cpp
 int r1 = f(2);
 int r2 = f(-2);  // 抛出异常
 ```
-
 ##### 注解
 
 ???
@@ -4163,9 +3722,7 @@ int r2 = f(-2);  // 抛出异常
 
 ```cpp
 vector<int> vec = /*...*/;
-```
 
-```cpp
 for (int i = 0; i < vec.size(); i += 2)                    // 可能不够大
     cout << vec[i] << '\n';
 for (unsigned i = 0; i < vec.size(); i += 2)               // 有风险的回绕
@@ -4179,20 +3736,16 @@ for (auto i = vec.size()-1; i >= 0; i -= 2)                // BUG
 for (int i = vec.size()-1; i >= 0; i -= 2)                 // 可能不够大
     cout << vec[i] << '\n';
 ```
-
 ##### 示例，好
 
 ```cpp
 vector<int> vec = /*...*/;
-```
 
-```cpp
 for (gsl::index i = 0; i < vec.size(); i += 2)             // ok
     cout << vec[i] << '\n';
 for (gsl::index i = vec.size()-1; i >= 0; i -= 2)          // ok
     cout << vec[i] << '\n';
 ```
-
 ##### 注解
 
 内建数组允许有符号的下标。
@@ -4211,13 +3764,11 @@ public:
     // ...
 };
 ```
-
 ##### 示例
 
 ```cpp
 ??? 演示改进后的代码生成和潜在可进行的错误检查 ???
 ```
-
 ##### 替代方案
 
 可以代之以

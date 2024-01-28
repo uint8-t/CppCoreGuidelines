@@ -56,7 +56,6 @@ IDE 也都会提供某些默认方案和一组替代方案。
 ```cpp
 auto x = m * v1 + vv;   // 将 m 乘以 v1 并将其结果加上 vv
 ```
-
 ##### 强制实施
 
 构建一个 AI 程序来解释口语英文文字，看看它所说的是否可以用 C++ 来更好地表达。
@@ -77,7 +76,6 @@ void stable_sort(Sortable& c)
     // ... 相当多的不平常的代码行 ...
 }
 ```
-
 ##### 注解
 
 如果代码注释和代码有冲突，则它们都可能是错的。
@@ -113,20 +111,16 @@ for (i = 0; i < max; ++i); // 可能出现的 BUG
 if (i == j)
     return i;
 ```
-
 ##### 注解
 
 总是把 `if (...)`，`for (...)`，以及 `while (...)` 之后的语句进行缩进是一个好主意：
 
 ```cpp
 if (i < 0) error("negative argument");
-```
 
-```cpp
 if (i < 0)
     error("negative argument");
 ```
-
 ##### 强制实施
 
 使用一种工具。
@@ -144,25 +138,19 @@ if (i < 0)
 ```cpp
 void print_int(int i);
 void print_string(const char*);
-```
 
-```cpp
 print_int(1);          // 重复，人工进行类型匹配
 print_string("xyzzy"); // 重复，人工进行类型匹配
 ```
-
 ##### 示例，好
 
 ```cpp
 void print(int i);
 void print(string_view);    // 对任意字符串式的序列都能工作
-```
 
-```cpp
 print(1);              // 简洁，自动类型匹配
 print("xyzzy");        // 简洁，自动类型匹配
 ```
-
 ##### 注解
 
 带有类型编码的名字要么啰嗦要么难懂。
@@ -172,7 +160,6 @@ printS  // 打印一个 std::string
 prints  // 打印一个 C 风格字符串
 printi  // 打印一个 int
 ```
-
 在无类型语言中曾经采用过像匈牙利记法这样的技巧来在名字中编码类型，但在像 C++ 这样的强静态类型语言中，这通常是不必要而且实际上是有害的，因为这些标注会过时（这些累赘和注释类似，而且和它们一样会烂掉），而且它们干扰了语言的恰当用法（应当代之以使用相同的名字和重载决议）。
 
 ##### 注解
@@ -184,14 +171,11 @@ auto p = new User();
 auto p = make_unique<User>();
 // 注："p" 并非是说“User 类型的原始指针”，
 //     而只是一般性的“这是一次间接访问”
-```
 
-```cpp
 auto cntHits = calc_total_of_hits(/*...*/);
 // 注："cnt" 并非用于编码某个类型，
 //     而只是一般性的“这是某种东西的一个计数”
 ```
-
 这样做是没有害处的，且并不属于本条指导方针，因为其并未编码类型信息。
 
 ##### 注解
@@ -204,7 +188,6 @@ struct S {
     S(int m) : m_{abs(m)} { }
 };
 ```
-
 这样做是没有害处的，且并不属于本条指导方针，因为其并未编码类型信息。
 
 ##### 注解
@@ -217,12 +200,9 @@ typename<typename T>
 class HashTable {   // 将 string 映射为 T
     // ...
 };
-```
 
-```cpp
 HashTable<int> index;
 ```
-
 这样做是没有害处的，且并不属于本条指导方针，因为其并未编码类型信息。
 
 ### <a name="Rl-name-length"></a>NL.7: 使名字的长度大约正比于其作用域的长度
@@ -233,24 +213,15 @@ HashTable<int> index;
 
 ```cpp
 double sqrt(double x);   // 返回 x 的平方根；x 必须是非负数
-```
 
-```cpp
 int length(const char* p);  // 返回零结尾的 C 风格字符串的字符数量
-```
 
-```cpp
 int length_of_string(const char zero_terminated_array_of_char[])    // 不好: 啰嗦
-```
 
-```cpp
 int g;      // 不好: 全局变量具有密秘的名字
-```
 
-```cpp
 int open;   // 不好: 全局变量使用短小且常用的名字
 ```
-
 为指针使用 `p`，以及为浮点变量使用 `x` 是符合惯例的，在受限的作用域中不会造成混乱。
 
 ##### 强制实施
@@ -304,7 +275,6 @@ CamelCase：多词标识符的每个词首字母大写：
 int mtbf {12};
 int mean_time_between_failures {12}; // 你自己决定
 ```
-
 ##### 强制实施
 
 除使用具有不同命名约定的程序库之外应当是可能做到的。
@@ -324,7 +294,6 @@ void f()
     int v[SIZE];
 }
 ```
-
 ##### 注解
 
 这条规则适用于非宏的符号常量：
@@ -332,7 +301,6 @@ void f()
 ```cpp
 enum bad { BAD, WORSE, HORRIBLE }; // 不好
 ```
-
 ##### 强制实施
 
 * 对带有小写字母的宏进行标记
@@ -381,7 +349,6 @@ auto c = 299'792'458; // m/s2
 auto q2 = 0b0000'1111'0000'0000;
 auto ss_number = 123'456'7890;
 ```
-
 ##### 示例
 
 需要清晰性时使用字面量后缀
@@ -391,7 +358,6 @@ auto hello = "Hello!"s; // std::string
 auto world = "world";   // C 风格字符串
 auto interval = 100ms;  // 使用 <chrono>
 ```
-
 ##### 注解
 
 不能在代码中到处当做[“魔法常量”](S-expr.md#Res-magic)一样乱用字面量，
@@ -410,26 +376,24 @@ auto interval = 100ms;  // 使用 <chrono>
 
 ##### 示例，不好
 
-    #include < map >
-
 ```cpp
+#include < map >
+
 int main(int argc, char * argv [ ])
 {
     // ...
 }
 ```
-
 ##### 示例
 
-    #include <map>
-
 ```cpp
+#include <map>
+
 int main(int argc, char* argv[])
 {
     // ...
 }
 ```
-
 ##### 注解
 
 一些 IDE 有其自己的看法，并会添加分散的空格。
@@ -471,7 +435,6 @@ private:
     // 实现细节
 };
 ```
-
 ##### 示例
 
 有时候，成员的默认顺序，与将公开接口从实现细节中分离出来的需求之间有冲突。
@@ -487,7 +450,6 @@ private:
     // 实现细节（类型，函数和数据）
 };
 ```
-
 ##### 示例，不好
 
 避免让具有某一种访问（如 `public`）的多个声明块被具有不同访问（如 `private`）的其他声明块分隔开。
@@ -501,7 +463,6 @@ public:
     // ...
 };
 ```
-
 用宏来声明成员组的做法通常会导致违反所有的次序规则。
 不过，宏的使用掩盖了其所表达的东西。
 
@@ -529,17 +490,13 @@ struct Cable {
     int x;
     // ...
 };
-```
 
-```cpp
 double foo(int x)
 {
     if (0 < x) {
         // ...
     }
-```
 
-```cpp
     switch (x) {
     case 0:
         // ...
@@ -551,25 +508,18 @@ double foo(int x)
         // ...
         break;
     }
-```
 
-```cpp
     if (0 < x)
         ++x;
-```
 
-```cpp
     if (x < 0)
         something();
     else
         something_else();
-```
 
-```cpp
     return some_value;
 }
 ```
-
 注意 `if` 和 `(` 之间有一个空格
 
 ##### 注解
@@ -606,7 +556,6 @@ T& operator[](size_t);   // OK
 T &operator[](size_t);   // 奇怪
 T & operator[](size_t);   // 不确定
 ```
-
 ##### 注解
 
 这个推荐适用于[当你没有约束条件或者没有更好的想法时](S-naming.md#S-naming)的情况。
@@ -629,13 +578,10 @@ T & operator[](size_t);   // 不确定
 
 ```cpp
 int oO01lL = 6; // 不好
-```
 
-```cpp
 int splunk = 7;
 int splonk = 8; // 不好：splunk 和 splonk 很容易搞混
 ```
-
 ##### 强制实施
 
 ???
@@ -653,7 +599,6 @@ int splonk = 8; // 不好：splunk 和 splonk 很容易搞混
 int x = 7; char* p = 29;    // 请勿如此
 int x = 7; f(x);  ++x;      // 请勿如此
 ```
-
 ##### 强制实施
 
 容易。
@@ -680,12 +625,9 @@ int x = 7; f(x);  ++x;      // 请勿如此
 
 ```cpp
 void f(void);   // 不好
-```
 
-```cpp
 void g();       // 好多了
 ```
-
 ##### 注解
 
 即便是 Dennis Ritchie 自己都认为 `void f(void)` 很讨厌。
@@ -695,7 +637,6 @@ void g();       // 好多了
 int f();
 f(1, 2, "weird but valid C89");   // 希望 f() 被定义为 int f(a, b, c) char* c; { /* ... */ }
 ```
-
 可能造成很大的问题，但这并不适于 21 世纪和 C++。
 
 ### <a name="Rl-const"></a>NL.26: 采用符合惯例的 `const` 写法
@@ -710,13 +651,10 @@ f(1, 2, "weird but valid C89");   // 希望 f() 被定义为 int f(a, b, c) char
 ```cpp
 const int x = 7;    // OK
 int const y = 9;    // 不好
-```
 
-```cpp
 const int *const p = nullptr;   // OK, 指向常量 int 的常量指针
 int const *const p = nullptr;   // 不好，指向常量 int 的常量指针
 ```
-
 ##### 注解
 
 我们知道你可能会说“不好”的例子比标有“OK”的更符合逻辑，
@@ -759,14 +697,11 @@ int const *const p = nullptr;   // 不好，指向常量 int 的常量指针
 // foo.h:
 extern int a;   // 声明
 extern void foo();
-```
 
-```cpp
 // foo.cpp:
 int a;   // 定义
 void foo() { ++a; }
 ```
-
 `foo.h` 提供了 `foo.cpp` 的接口。最好避免全局变量。
 
 ##### 示例，不好
@@ -776,7 +711,6 @@ void foo() { ++a; }
 int a;   // 定义
 void foo() { ++a; }
 ```
-
 一个程序中两次 `#include <foo.h>` 将导致因为对唯一定义规则的两次违反而出现一个连接错误。
 
 ##### 强制实施

@@ -73,9 +73,7 @@ double cached_computation(int x)
     // 不好：这些静态变量导致多线程的使用情况中的数据竞争
     static int cached_x = 0.0;
     static double cached_result = COMPUTATION_OF_ZERO;
-```
 
-```cpp
     if (cached_x != x) {
         cached_x = x;
         cached_result = computation(x);
@@ -83,7 +81,6 @@ double cached_computation(int x)
     return cached_result;
 }
 ```
-
 虽然 `cached_computation` 在单线程环境中可以正确工作，但在多线程环境中，其两个 `static` 变量将导致数据竞争进而发生未定义的行为。
 
 ##### 示例，好
@@ -92,9 +89,7 @@ double cached_computation(int x)
 struct ComputationCache {
     int cached_x = 0;
     double cached_result = COMPUTATION_OF_ZERO;
-```
 
-```cpp
     double compute(int x) {
         if (cached_x != x) {
             cached_x = x;
@@ -104,7 +99,6 @@ struct ComputationCache {
     }
 };
 ```
-
 这里的缓存作为 `ComputationCache` 对象的成员数据保存，而非共享的静态状态。
 这项重构本质上是将关注点委派给了调用方：
 单线程程序可能仍会选择采用一个全局的 `ComputationCache` 对象，
@@ -156,7 +150,6 @@ int get_id()
   return id++;
 }
 ```
-
 这里的增量操作就是数据竞争的一个例子。这可能以许多方式导致发生错误，
 包括：
 
@@ -184,7 +177,6 @@ void f(fstream& fs, regex pattern)
     // ...
 }
 ```
-
 这里，在 `buf` 的元素上有一个（很讨厌的）数据竞争（`sort` 既会读取也会写入）。
 所有的数据竞争都很讨厌。
 我们这里设法在栈上的数据上造成了数据竞争。
@@ -194,13 +186,9 @@ void f(fstream& fs, regex pattern)
 
 ```cpp
 // 未用锁进行控制的代码
-```
 
-```cpp
 unsigned val;
-```
 
-```cpp
 if (val < 5) {
     // ... 其他线程可能在这里改动 val ...
     switch (val) {
@@ -212,7 +200,6 @@ if (val < 5) {
     }
 }
 ```
-
 这里，若编译器不知道 `val` 可能改变，它最可能将这个 `switch` 实现为一个有五个项目的跳转表。
 然后，超出 `[0..4]` 范围的 `val` 值将会导致跳转到程序中的任何可能位置的地址，从那个位置继续执行。
 真的，当你遇到数据竞争时什么都可能发生。
@@ -250,9 +237,7 @@ bool validate(const vector<Reading>&);
 Graph<Temp_node> temperature_gradients(const vector<Reading>&);
 Image altitude_map(const vector<Reading>&);
 // ...
-```
 
-```cpp
 void process_readings(const vector<Reading>& surface_readings)
 {
     auto h1 = async([&] { if (!validate(surface_readings)) throw Invalid_data{}; });
@@ -265,7 +250,6 @@ void process_readings(const vector<Reading>& surface_readings)
     // ...
 }
 ```
-
 没有这些 `const` 的话，我们就必须为潜在的数据竞争而为在 `surface_readings` 上的所有异步函数调用进行复审。
 使 `surface_readings` （对于这个函数）为 `const` 允许我们仅在函数体代码中进行推理。
 
@@ -300,7 +284,6 @@ void some_fun(const std::string& msg)
     publisher.join();
 }
 ```
-
 ##### 注解
 
 除了 `async()` 之外，标准库中的设施都是底层的，面向机器的，线程和锁层次的设施。
@@ -323,15 +306,12 @@ void some_fun(const std::string& msg)
 
 ```cpp
 int free_slots = max_slots; // 当前的对象内存的来源
-```
 
-```cpp
 Pool* use()
 {
     if (int n = free_slots--) return &pool[n];
 }
 ```
-
 这里有一个问题：
 这在单线程程序中是完全正确的代码，但若有两个线程执行，
 并且在 `free_slots` 上发生竞争条件时，两个线程就可能拿到相同的值和 `free_slots`。
@@ -339,30 +319,24 @@ Pool* use()
 
 ```cpp
 volatile int free_slots = max_slots; // 当前的对象内存的来源
-```
 
-```cpp
 Pool* use()
 {
     if (int n = free_slots--) return &pool[n];
 }
 ```
-
 这并没有同步效果：数据竞争仍然存在！
 
 C++ 对此的机制是 `atomic` 类型：
 
 ```cpp
 atomic<int> free_slots = max_slots; // 当前的对象内存的来源
-```
 
-```cpp
 Pool* use()
 {
     if (int n = free_slots--) return &pool[n];
 }
 ```
-
 现在的 `--` 操作是原子性的，
 而不是可能被另一个线程介入其独立操作之间的读-增量-写序列。
 
@@ -387,7 +361,6 @@ Pool* use()
 ```cpp
 ???
 ```
-
 ##### 注解
 
 线程安全性是一种有挑战性的任务，有经验的程序员通常可以做得更好一些：缓解这些风险的一种重要策略是运用工具。
@@ -457,9 +430,7 @@ Pool* use()
 
 ```cpp
 mutex mtx;
-```
 
-```cpp
 void do_stuff()
 {
     mtx.lock();
@@ -467,21 +438,17 @@ void do_stuff()
     mtx.unlock();
 }
 ```
-
 或早或晚都会有人忘记 `mtx.unlock()`，在 `... 做一些事 ...` 中放入一个 `return`，抛出异常，或者别的什么。
 
 ```cpp
 mutex mtx;
-```
 
-```cpp
 void do_stuff()
 {
     unique_lock<mutex> lck {mtx};
     // ... 做一些事 ...
 }
 ```
-
 ##### 强制实施
 
 标记对成员 `lock()` 和 `unlock()` 的调用。 ???
@@ -501,14 +468,11 @@ void do_stuff()
 // 线程 1
 lock_guard<mutex> lck1(m1);
 lock_guard<mutex> lck2(m2);
-```
 
-```cpp
 // 线程 2
 lock_guard<mutex> lck2(m2);
 lock_guard<mutex> lck1(m1);
 ```
-
 代之以使用 `lock()`：
 
 ```cpp
@@ -516,27 +480,21 @@ lock_guard<mutex> lck1(m1);
 lock(m1, m2);
 lock_guard<mutex> lck1(m1, defer_lock);
 lock_guard<mutex> lck2(m2, defer_lock);
-```
 
-```cpp
 // 线程 2
 lock(m2, m1);
 lock_guard<mutex> lck2(m2, defer_lock);
 lock_guard<mutex> lck1(m1, defer_lock);
 ```
-
 或者（这样更佳，但仅为 C++17）：
 
 ```cpp
 // 线程 1
 scoped_lock<mutex, mutex> lck1(m1, m2);
-```
 
-```cpp
 // 线程 2
 scoped_lock<mutex, mutex> lck2(m2, m1);
 ```
-
 这样，`thread1` 和 `thread2` 的作者们仍然未在 `mutex` 的顺序上达成一致，但顺序不再是问题了。
 
 ##### 注解
@@ -551,7 +509,6 @@ scoped_lock<mutex, mutex> lck2(m2, m1);
 ```cpp
 lock_guard lck1(m1, adopt_lock);
 ```
-
 而让 `mutex` 类型被推断出来。
 
 ##### 强制实施
@@ -577,7 +534,6 @@ void do_this(Foo* p)
     // ...
 }
 ```
-
 如果不知道 `Foo::act` 会干什么（可能它是一个虚函数，调用某个还未编写的某个派生类成员），
 它可能会（递归地）调用 `do_this` 因而在 `my_mutex` 上造成死锁。
 可能它会在某个别的 `mutex` 上锁定而无法在适当的时间内返回，对任何调用了 `do_this` 的代码造成延迟。
@@ -589,9 +545,7 @@ void do_this(Foo* p)
 
 ```cpp
 recursive_mutex my_mutex;
-```
 
-```cpp
 template<typename Action>
 void do_something(Action f)
 {
@@ -601,7 +555,6 @@ void do_something(Action f)
     // ...
 }
 ```
-
 如果如同其很可能做的那样，`f()` 调用了 `*this` 的某个操作的话，我们就必须保证在调用之前对象的不变式是满足的。
 
 ##### 强制实施
@@ -627,9 +580,7 @@ void f(int* p)
     // ...
 }
 int glob = 33;
-```
 
-```cpp
 void some_fct(int* p)
 {
     int x = 77;
@@ -641,7 +592,6 @@ void some_fct(int* p)
     // ...
 }
 ```
-
 `gsl::joining_thread` 是一种 `std::thread`，其析构函数进行联结且不可被 `detached()`。
 这里的“OK”表明对象能够在 `thread` 可以使用指向它的指针时一直处于作用域（“存活”）。
 `thread` 运行的并发性并不会影响这里的生存期或所有权问题；
@@ -668,13 +618,9 @@ void f(int* p)
     *p = 99;
     // ...
 }
-```
 
-```cpp
 int glob = 33;
-```
 
-```cpp
 void some_fct(int* p)
 {
     int x = 77;
@@ -691,7 +637,6 @@ void some_fct(int* p)
     // ...
 }
 ```
-
 这里的“OK”表明对象能够在 `thread` 可以使用指向它的指针时一直处于作用域（“存活”）。
 “bad”则表示 `thread` 可能在对象销毁之后使用指向它的指针。
 `thread` 运行的并发性并不会影响这里的生存期或所有权问题；
@@ -730,47 +675,35 @@ void some_fct(int* p)
 
 ```cpp
 void f() { std::cout << "Hello "; }
-```
 
-```cpp
 struct F {
     void operator()() const { std::cout << "parallel world "; }
 };
-```
 
-```cpp
 int main()
 {
     std::thread t1{f};      // f() 在独立线程中执行
     std::thread t2{F()};    // F()() 在独立线程中执行
 }  // 请找出问题
 ```
-
 ##### 示例
 
 ```cpp
 void f() { std::cout << "Hello "; }
-```
 
-```cpp
 struct F {
     void operator()() const { std::cout << "parallel world "; }
 };
-```
 
-```cpp
 int main()
 {
     std::thread t1{f};      // f() 在独立线程中执行
     std::thread t2{F()};    // F()() 在独立线程中执行
-```
 
-```cpp
     t1.join();
     t2.join();
 }  // 剩下一个糟糕的 BUG
 ```
-
 ##### 注解
 
 使“不死线程”成为全局的，将其放入外围作用域中，或者放入自由存储中，而不要 `detach()` 它们。
@@ -800,9 +733,7 @@ int main()
 
 ```cpp
 void heartbeat();
-```
 
-```cpp
 void use()
 {
     std::thread t(heartbeat);             // 不联结；打算持续运行 heartbeat
@@ -810,7 +741,6 @@ void use()
     // ...
 }
 ```
-
 这是一种合理的线程用法，一般会使用 `detach()`。
 但这里有些问题。
 我们怎么监控脱离的线程以查看它是否存活呢？
@@ -823,25 +753,18 @@ void use()
 
 ```cpp
 void heartbeat();
-```
 
-```cpp
 gsl::joining_thread t(heartbeat);             // 打算持续运行 heartbeat
 ```
-
 这个心跳，（除非出错或者硬件故障等情况）将在程序运行时一直运行。
 
 有时候，我们需要将创建点和所有权点分离开：
 
 ```cpp
 void heartbeat();
-```
 
-```cpp
 unique_ptr<gsl::joining_thread> tick_tock {nullptr};
-```
 
-```cpp
 void use()
 {
     // 打算在 tick_tock 存活期间持续运行 heartbeat
@@ -849,7 +772,6 @@ void use()
     // ...
 }
 ```
-
 ##### 强制实施
 
 标记 `detach()`。
@@ -871,16 +793,13 @@ void use()
 ```cpp
 string modify1(string);
 void modify2(string&);
-```
 
-```cpp
 void fct(string& s)
 {
     auto res = async(modify1, s);
     async(modify2, s);
 }
 ```
-
 `modify1` 的调用涉及两个 `string` 值的复制；而 `modify2` 的调用则不会。
 另一方面，`modify1` 的实现和我们为单线程代码所编写的完全一样，
 而 `modify2` 的实现则需要某种形式的锁定以避免数据竞争。
@@ -909,7 +828,6 @@ void fct(string& s)
 ```cpp
 ???
 ```
-
 ##### 注解
 
 * 可以共享静态对象（比如全局对象），因为它并不像是需要某个线程来负责其删除那样被谁所拥有。
@@ -932,7 +850,6 @@ void fct(string& s)
 ```cpp
 ???
 ```
-
 ##### 强制实施
 
 ???
@@ -951,42 +868,33 @@ void worker(Message m)
 {
     // 处理
 }
-```
 
-```cpp
 void dispatcher(istream& is)
 {
     for (Message m; is >> m; )
         run_list.push_back(new thread(worker, m));
 }
 ```
-
 这会为每个消息产生一个线程，而 `run_list` 则假定在它们完成后对这些任务进行销毁。
 
 我们可以用一组预先创建的工作线程来处理这些消息：
 
 ```cpp
 Sync_queue<Message> work;
-```
 
-```cpp
 void dispatcher(istream& is)
 {
     for (Message m; is >> m; )
         work.put(m);
 }
-```
 
-```cpp
 void worker()
 {
     for (Message m; m = work.get(); ) {
         // 处理
     }
 }
-```
 
-```cpp
 void workers()  // 设立工作线程（这里是 4 个工作线程）
 {
     joining_thread w1 {worker};
@@ -995,7 +903,6 @@ void workers()  // 设立工作线程（这里是 4 个工作线程）
     joining_thread w4 {worker};
 }
 ```
-
 ##### 注解
 
 如果你的系统有一个好的线程池的话，就请使用它。
@@ -1017,9 +924,7 @@ void workers()  // 设立工作线程（这里是 4 个工作线程）
 ```cpp
 std::condition_variable cv;
 std::mutex mx;
-```
 
-```cpp
 void thread1()
 {
     while (true) {
@@ -1028,9 +933,7 @@ void thread1()
         cv.notify_one();    // 唤醒另一个线程
     }
 }
-```
 
-```cpp
 void thread2()
 {
     while (true) {
@@ -1040,7 +943,6 @@ void thread2()
     }
 }
 ```
-
 这里，如果某个其他 `thread` 消费了 `thread1` 的通知的话，`thread2` 将会永远等待下去。
 
 ##### 示例
@@ -1057,9 +959,7 @@ private:
     condition_variable cond;    // 这用于控制访问
     list<T> q;
 };
-```
 
-```cpp
 template<typename T>
 void Sync_queue<T>::put(const T& val)
 {
@@ -1067,9 +967,7 @@ void Sync_queue<T>::put(const T& val)
     q.push_back(val);
     cond.notify_one();
 }
-```
 
-```cpp
 template<typename T>
 void Sync_queue<T>::get(T& val)
 {
@@ -1079,7 +977,6 @@ void Sync_queue<T>::get(T& val)
     q.pop_front();
 }
 ```
-
 这样当执行 `get()` 的线程被唤醒时，如果队列为空（比如因为别的线程在之前已经 `get()` 过了），
 它将立刻回到睡眠中继续等待。
 
@@ -1106,7 +1003,6 @@ void do_something() // 不好
     do2();  // 清理：不需要锁定
 }
 ```
-
 这里我们持有的锁定比所需的要长：
 我们不应该在必须锁定之前就获取锁定，而且应当在开始清理之前将其释放掉。
 可以将其重写为：
@@ -1121,7 +1017,6 @@ void do_something() // 不好
     do2();  // 清理：不需要锁定
 }
 ```
-
 但这样损害了安全性并且违反了[使用 RAII](S-concurrency.md#Rconc-raii) 规则。
 我们可以为临界区添加语句块：
 
@@ -1136,7 +1031,6 @@ void do_something() // OK
     do2();  // 清理：不需要锁定
 }
 ```
-
 ##### 强制实施
 
 一般来说是不可能的。
@@ -1155,9 +1049,7 @@ void do_something() // OK
 // 全局互斥体
 mutex m1;
 mutex m2;
-```
 
-```cpp
 void f()
 {
     unique_lock<mutex>(m1); // (A)
@@ -1165,7 +1057,6 @@ void f()
     // 关键区中的工作
 }
 ```
-
 这个貌似足够有效，但其实并非如此。在 (A) 点，`m1` 是一个
 默认构造的局部 `unique_lock`，它隐藏了全局的 `::m1`（且并未锁定它）。
 在 (B) 点，构造了一个无名 `lock_guard` 临时对象并锁定了 `::m2`，
@@ -1194,9 +1085,7 @@ struct Record {
     std::mutex m;   // 访问其他成员之前应当获取这个 mutex
     // ...
 };
-```
 
-```cpp
 class MyClass {
     struct DataRecord {
        // ...
@@ -1204,7 +1093,6 @@ class MyClass {
     synchronized_value<DataRecord> data; // 用互斥体保护数据
 };
 ```
-
 ##### 强制实施
 
 ??? 可能吗？
@@ -1244,7 +1132,6 @@ std::shared_ptr<Foo> sharedFoo = get_foo();
   lambda();
 } // lambda 闭包对象此时已离开作用域
 ```
-
 ##### 示例，更好
 
 ```cpp
@@ -1259,7 +1146,6 @@ std::shared_ptr<Foo> sharedFoo = get_foo();
   lambda(sharedFoo, value); 
 } // lambda 闭包对象此时已离开作用域
 ```
-
 ##### 示例，最佳
 
 使用函数作为协程。
@@ -1270,9 +1156,7 @@ std::future<void> Class::do_something(int value, std::shared_ptr<Foo> sharedFoo)
   co_await something();
   // sharedFoo 和 value 此时仍然有效
 }
-```
 
-```cpp
 void SomeOtherFunction()
 {
   int value = get_value();
@@ -1280,7 +1164,6 @@ void SomeOtherFunction()
   do_something(value, sharedFoo); 
 }
 ```
-
 ##### 强制实施
 
 标记作为协程且具有非空俘获列表的 lambda 表达式。
@@ -1298,9 +1181,7 @@ void SomeOtherFunction()
 
 ```cpp
 std::mutex g_lock;
-```
 
-```cpp
 std::future<void> Class::do_something()
 {
     std::lock_guard<std::mutex> guard(g_lock);
@@ -1308,14 +1189,11 @@ std::future<void> Class::do_something()
     co_await somethingElse();
 }
 ```
-
 ##### 示例，好
 
 ```cpp
 std::mutex g_lock;
-```
 
-```cpp
 std::future<void> Class::do_something()
 {
     {
@@ -1325,9 +1203,8 @@ std::future<void> Class::do_something()
     co_await something(); // OK：锁已经在协程挂起前被释放
     co_await somethingElse();
 }
+
 ```
-
-
 ##### 注解
 
 这种模式对于性能也不好。每当遇到比如 `co_await` 这样的挂起点时，都会停止当前函数的执行而去运行别的代码。而在协程恢复之前可能会经过很长时间。这个锁会在整个时间段中持有，并且无法被其他线程获得以进行别的工作。
@@ -1348,14 +1225,11 @@ std::future<void> Class::do_something()
 std::future<int> Class::do_something(const std::shared_ptr<int>& input)
 {
     co_await something();
-```
 
-```cpp
     // 危险：对 input 的引用可能不再有效，可能已经是已释放内存
     co_return *input + 1;
 }
 ```
-
 ##### 示例，好
 
 ```cpp
@@ -1365,7 +1239,6 @@ std::future<int> Class::do_something(std::shared_ptr<int> input)
     co_return *input + 1; // input 是一个副本，且到此处仍有效
 }
 ```
-
 ##### 注解
 
 这个问题并不适用于仅在第一个挂起点之前访问的引用形参。此后对函数的改动中可能会添加或移除挂起点，而这可能会再次引入这一类的缺陷。一些种类的协程，在协程执行第一行代码之前就会有挂起点，这种情况中的引用形参总是不安全的。一直采用按值传递的方式更安全，因为所复制的形参存活于协程的栈帧中，并在整个协程中都可以安全访问。
@@ -1422,7 +1295,6 @@ std::future<int> Class::do_something(std::shared_ptr<int> input)
 ```cpp
 ???
 ```
-
 ##### 注解
 
 ???
@@ -1450,9 +1322,7 @@ int read_value(const std::string& filename)
     in >> value;
     return value;
 }
-```
 
-```cpp
 void async_example()
 {
     try {
@@ -1464,7 +1334,6 @@ void async_example()
     }
 }
 ```
-
 ##### 注解
 
 不幸的是，`async()` 并不完美。比如说，它并不使用线程池，
@@ -1486,19 +1355,14 @@ void async_example()
         p1.set_value(read_value("v1.txt"));
     });
     t1.detach(); // 恶行
-```
 
-```cpp
     std::packaged_task<int()> pt2(read_value, "v2.txt");
     std::future<int> f2 = pt2.get_future();
     std::thread(std::move(pt2)).detach();
-```
 
-```cpp
     std::cout << f1.get() + f2.get() << '\n';
 }
 ```
-
 ##### 示例（好）
 
 这个例子展示一种方法，可以让你在当 `std::async` 自身
@@ -1517,7 +1381,6 @@ void async_example(WorkQueue& wq)
     std::cout << f1.get() + f2.get() << '\n';
 }
 ```
-
 所有为执行 `read_value` 的代码而产生的线程都被隐藏到对
 `WorkQueue::enqueue` 的调用之内。用户代码仅需处理 `future` 对象，
 无需处理原始 `thread`，`promise` 或 `packaged_task` 对象。
@@ -1570,20 +1433,15 @@ void async_example(WorkQueue& wq)
 
 ```cpp
 extern atomic<Link*> head;        // 共享的链表表头
-```
 
-```cpp
 Link* nh = new Link(data, nullptr);    // 为进行插入制作一个连接
 Link* h = head.load();                 // 读取链表中的共享表头
-```
 
-```cpp
 do {
     if (h->data <= data) break;        // 这样的话，就插入到别处
     nh->next = h;                      // 下一个元素是之前的表头
 } while (!head.compare_exchange_weak(h, nh));    // 将 nh 写入 head 或 h
 ```
-
 请找出这里的 BUG。
 通过测试找到它是非常困难的。
 请阅读有关 ABA 问题的材料。
@@ -1660,7 +1518,6 @@ void f()
     // ...
 }
 ```
-
 使用 C++11 的线程安全静态局部变量的例子。
 
 ```cpp
@@ -1670,9 +1527,7 @@ void f()
     static My_class my_object; // 构造函数仅调用一次
     // ...
 }
-```
 
-```cpp
 class My_class
 {
 public:
@@ -1682,7 +1537,6 @@ public:
     }
 };
 ```
-
 ##### 强制实施
 
 ??? 是否可能检测出这种惯用法？
@@ -1703,9 +1557,7 @@ public:
 ```cpp
 mutex action_mutex;
 volatile bool action_needed;
-```
 
-```cpp
 if (action_needed) {
     std::lock_guard<std::mutex> lock(action_mutex);
     if (action_needed) {
@@ -1714,15 +1566,12 @@ if (action_needed) {
     }
 }
 ```
-
 ##### 示例，好
 
 ```cpp
 mutex action_mutex;
 atomic<bool> action_needed;
-```
 
-```cpp
 if (action_needed) {
     std::lock_guard<std::mutex> lock(action_mutex);
     if (action_needed) {
@@ -1731,15 +1580,12 @@ if (action_needed) {
     }
 }
 ```
-
 这对于正确调校的内存顺序可能会带来好处，其中的获取加载要比顺序一致性加载更加高效
 
 ```cpp
 mutex action_mutex;
 atomic<bool> action_needed;
-```
 
-```cpp
 if (action_needed.load(memory_order_acquire)) {
     lock_guard<std::mutex> lock(action_mutex);
     if (action_needed.load(memory_order_relaxed)) {
@@ -1748,7 +1594,6 @@ if (action_needed.load(memory_order_acquire)) {
     }
 }
 ```
-
 ##### 强制实施
 
 ??? 是否可能检测出这种惯用法？
@@ -1772,7 +1617,6 @@ if (action_needed.load(memory_order_acquire)) {
 ```cpp
 const volatile long clock;
 ```
-
 这说明了一个被某个时钟电路不断更新的寄存器。
 `clock` 为 `volatile` 是因为其值将会在没有使用它的 C++ 程序的任何动作下被改变。
 例如，两次读取 `clock` 经常会产生两个不同的值，因此优化器最好不要将下面代码中的第二个读取操作优化掉：
@@ -1782,7 +1626,6 @@ long t1 = clock;
 // ... 这里没有对 clock 的使用 ...
 long t2 = clock;
 ```
-
 `clock` 为 `const` 是因为程序不应当试图写入 `clock`。
 
 ##### 注解
@@ -1798,14 +1641,12 @@ int volatile* vi = get_hardware_memory_location();
     // 注意：我们获得了指向别人的内存的指针
     // volatile 说明“请特别尊重地对待”
 ```
-
 有时候 C++ 代码会分配 `volatile` 内存，并通过故意地暴露一个指针来将其共享给“别人”（硬件或其他语言）：
 
 ```cpp
 static volatile long vl;
 please_use_this(&vl);   // 暴露对这个的一个引用给“别人”（不是 C++）
 ```
-
 ##### 示例，不好
 
 `volatile` 局部变量几乎都是错误的——既然是短暂的，它们如何才能共享给其他语言或硬件呢？
@@ -1817,15 +1658,12 @@ void f()
     volatile int i = 0; // 不好，volatile 局部变量
     // etc.
 }
-```
 
-```cpp
 class My_type {
     volatile int i = 0; // 可以的，volatile 成员变量
     // etc.
 };
 ```
-
 ##### 注解
 
 于其他一些语言不通，C++ 中的 `volatile` [和同步没有任何关系](S-concurrency.md#Rconc-volatile)。

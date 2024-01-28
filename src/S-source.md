@@ -40,24 +40,15 @@ namespace Foo {
     int x = 7;
     int xx() { return x+x; }
 }
-```
 
-```cpp
 // file1.cpp:
-```
-    #include <file.h>
-```cpp
+#include <file.h>
 // ... 更多代码 ...
-```
 
-```cpp
  // file2.cpp:
-```
-    #include <file.h>
-```cpp
+#include <file.h>
 // ... 更多代码 ...
 ```
-
 当连接 `file1.cpp` 和 `file2.cpp` 时将出现两个连接器错误。
 
 **其他形式**: 头文件必须仅包含：
@@ -88,14 +79,11 @@ namespace Foo {
 ```cpp
 // bar.cpp:
 void bar() { cout << "bar\n"; }
-```
 
-```cpp
 // foo.cpp:
 extern void bar();
 void foo() { bar(); }
 ```
-
 `bar` 的维护者在需要改变 `bar` 的类型时，无法找到其全部声明。
 `bar` 的使用者不知道他所使用的接口是否完整和正确。顶多会从连接器获得一些（延迟的）错误消息。
 
@@ -111,25 +99,23 @@ void foo() { bar(); }
 
 ##### 示例
 
-    #include <vector>
-    #include <algorithm>
-    #include <string>
-
 ```cpp
+#include <vector>
+#include <algorithm>
+#include <string>
+
 // ... 我自己的代码 ...
 ```
-
 ##### 示例，不好
 
-    #include <vector>
-
 ```cpp
+#include <vector>
+
 // ... 我自己的代码 ...
+
+#include <algorithm>
+#include <string>
 ```
-
-    #include <algorithm>
-    #include <string>
-
 ##### 注解
 
 这对于 `.h` 和 `.cpp` 文件都同样适用。
@@ -166,15 +152,12 @@ void foo() { bar(); }
 void foo(int);
 int bar(long);
 int foobar(int);
-```
 
-```cpp
 // foo.cpp:
 void foo(int) { /* ... */ }
 int bar(double) { /* ... */ }
 double foobar(int);
 ```
-
 这个错误直到调用了 `bar` 或 `foobar` 的程序的连接时才会被发现。
 
 ##### 示例
@@ -184,19 +167,14 @@ double foobar(int);
 void foo(int);
 int bar(long);
 int foobar(int);
-```
 
-```cpp
 // foo.cpp:
-```
-    #include "foo.h"
+#include "foo.h"
 
-```cpp
 void foo(int) { /* ... */ }
 int bar(double) { /* ... */ }
 double foobar(int);   // 错误: 错误的返回类型
 ```
-
 `foobar` 的返回类型错误在编译 `foo.cpp` 时立即就被发现了。
 对 `bar` 的参数类型错误在连接时之前无法被发现，因为可能会有重载发生，但系统性地使用 `.h` 文件能够增加时其被程序员更早发现的可能性。
 
@@ -214,20 +192,17 @@ double foobar(int);   // 错误: 错误的返回类型
 
 ##### 示例
 
-    #include <string>
-    #include <vector>
-    #include <iostream>
-    #include <memory>
-    #include <algorithm>
-
 ```cpp
+#include <string>
+#include <vector>
+#include <iostream>
+#include <memory>
+#include <algorithm>
+
 using namespace std;
-```
 
-```cpp
 // ...
 ```
-
 显然地，大量使用了标准库，而且貌似没使用别的程序库，因此要求每一处带有使用 `std::`
 会使人分散注意力。
 
@@ -235,12 +210,10 @@ using namespace std;
 
 使用 `using namespace std;` 导致程序员可能面临与标准库中的名字造成名字冲突
 
-    #include <cmath>
 ```cpp
+#include <cmath>
 using namespace std;
-```
 
-```cpp
 int g(int x)
 {
     int sqrt = 7;
@@ -248,7 +221,6 @@ int g(int x)
     return sqrt(x); // 错误
 }
 ```
-
 不过，不大可能导致并非错误的名字解析，
 假定使用 `using namespace std` 的人们都了解 `std` 以及这种风险。
 
@@ -273,28 +245,19 @@ int g(int x)
 
 ```cpp
 // bad.h
-```
-    #include <iostream>
-```cpp
+#include <iostream>
 using namespace std; // bad
-```
 
-```cpp
 // user.cpp
-```
-    #include "bad.h"
+#include "bad.h"
 
-```cpp
 bool copy(/*... some parameters ...*/);    // some function that happens to be named copy
-```
 
-```cpp
 int main()
 {
     copy(/*...*/);    // now overloads local ::copy and std::copy, could be ambiguous
 }
 ```
-
 ##### 注解
 
 一个例外是 `using namespace std::literals;`。若要在头文件中使用
@@ -319,14 +282,11 @@ int main()
 
 ```cpp
 // file foobar.h:
-```
-    #ifndef LIBRARY_FOOBAR_H
-    #define LIBRARY_FOOBAR_H
-```cpp
+#ifndef LIBRARY_FOOBAR_H
+#define LIBRARY_FOOBAR_H
 // ... 声明 ...
+#endif // LIBRARY_FOOBAR_H
 ```
-    #endif // LIBRARY_FOOBAR_H
-
 ##### 强制实施
 
 标记没有 `#include` 防卫的 `.h` 文件。
@@ -354,19 +314,14 @@ int main()
 
 ```cpp
 // file1.h:
-```
-    #include "file2.h"
+#include "file2.h"
 
-```cpp
 // file2.h:
-```
-    #include "file3.h"
+#include "file3.h"
 
-```cpp
 // file3.h:
+#include "file1.h"
 ```
-    #include "file1.h"
-
 ##### 强制实施
 
 对任何循环依赖进行标记。
@@ -382,12 +337,10 @@ int main()
 
 ##### 示例，不好
 
-    #include <iostream>
 ```cpp
+#include <iostream>
 using namespace std;
-```
 
-```cpp
 void use()
 {
     string s;
@@ -398,7 +351,6 @@ void use()
     }
 }
 ```
-
 `<iostream>` 暴露了 `std::string` 的定义（“为什么？”是一个有趣的问题），
 但其并不必然是通过传递包含整个 `<string>` 头文件而做到这一点的，
 这带来了常见的新手问题“为什么 `getline(cin,s);` 不成？”，
@@ -408,13 +360,11 @@ void use()
 
 ##### 示例，好
 
-    #include <iostream>
-    #include <string>
 ```cpp
+#include <iostream>
+#include <string>
 using namespace std;
-```
 
-```cpp
 void use()
 {
     string s;
@@ -425,7 +375,6 @@ void use()
     }
 }
 ```
-
 ##### 注解
 
 一些头文件正是用于从一些头文件中合并一组声明。
@@ -433,18 +382,18 @@ void use()
 
 ```cpp
 // basic_std_lib.h:
+
+#include <string>
+#include <map>
+#include <iostream>
+#include <random>
+#include <vector>
 ```
-
-    #include <string>
-    #include <map>
-    #include <iostream>
-    #include <random>
-    #include <vector>
-
 用户只用一条 `#include` 就可以获得整组的声明了：
 
-    #include "basic_std_lib.h"
-
+```cpp
+#include "basic_std_lib.h"
+```
 本条反对隐式包含的规则并不防止这种特意的聚集包含。
 
 ##### 强制实施
@@ -462,11 +411,10 @@ void use()
 
 ##### 示例
 
-    #include "helpers.h"
 ```cpp
+#include "helpers.h"
 // helpers.h 依赖于 std::string 并已包含了 <string>
 ```
-
 ##### 注解
 
 不遵守这条规则将导致头文件的使用方难于诊断所出现的错误。
@@ -493,13 +441,12 @@ void use()
 
 ```cpp
 // foo.cpp:
+#include <string>                // 来自标准程序库，要求使用 <> 形式
+#include <some_library/common.h> // 从另一个程序库中包含的，并非出于局部相对位置的文件；使用 <> 形式
+#include "foo.h"                 // 处于同一项目中局部相对于 foo.cpp 的文件，使用 "" 形式
+#include "foo_utils/utils.h"     // 处于同一项目中局部相对于 foo.cpp 的文件，使用 "" 形式
+#include <component_b/bar.h>     // 通过搜索路径定位到的处于同一项目中的文件，使用 <> 形式
 ```
-    #include <string>                // 来自标准程序库，要求使用 <> 形式
-    #include <some_library/common.h> // 从另一个程序库中包含的，并非出于局部相对位置的文件；使用 <> 形式
-    #include "foo.h"                 // 处于同一项目中局部相对于 foo.cpp 的文件，使用 "" 形式
-    #include "foo_utils/utils.h"     // 处于同一项目中局部相对于 foo.cpp 的文件，使用 "" 形式
-    #include <component_b/bar.h>     // 通过搜索路径定位到的处于同一项目中的文件，使用 <> 形式
-
 ##### 注解
 
 不遵守这条可能会导致很难诊断的错误：由于包含时指定的错误的范围而选择了错误的文件。例如，通常 `#include ""` 的搜索算法首先搜索存在于某个局部相对路径中的文件，因此使用这种形式来指代某个并非位于局部相对路径的文件，就一位置一旦在局部相对路径中出现了一个这样的文件（比如进行包含的文件被移动到了别的位置），它就会在原来所包含的文件之前被找到，并使包含文件集合以一种预料之外的方式被改变。
@@ -521,7 +468,6 @@ void use()
 ```cpp
 ???
 ```
-
 ##### 强制实施
 
 ???
@@ -539,30 +485,23 @@ void use()
 namespace
 {
     const double x = 1.234;  // 不好
-```
 
-```cpp
     double foo(double y)     // 不好
     {
         return y + x;
     }
 }
-```
 
-```cpp
 namespace Foo
 {
     const double x = 1.234; // 好
-```
 
-```cpp
     inline double foo(double y)        // 好
     {
         return y + x;
     }
 }
 ```
-
 ##### 强制实施
 
 * 对头文件中所使用的任何匿名命名空间进行标记。
@@ -582,7 +521,6 @@ int g();
 static bool h();
 int k();
 ```
-
 ##### 示例；好
 
 ```cpp
@@ -593,7 +531,6 @@ namespace {
 int g();
 int k();
 ```
-
 ##### 示例
 
 API 类及其成员不能放在无名命名空间中；而在实现源文件中所定义的任何的“辅助”类或函数则应当放在无名命名空间作用域之中。
@@ -601,7 +538,6 @@ API 类及其成员不能放在无名命名空间中；而在实现源文件中�
 ```cpp
 ???
 ```
-
 ##### 强制实施
 
 * ???

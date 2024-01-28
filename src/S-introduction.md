@@ -145,13 +145,11 @@
 ```cpp
 [[gsl::suppress(tag)]]
 ```
-
 或可选地带有一条消息（遵循常规的 C++11 标准标注语法）：
 
 ```cpp
 [[gsl::suppress(tag, justification: "message")]]
 ```
-
 其中
 
 * `tag` 是包含强制规则的条目的锚定名字（例如，[C.134](S-class.md#Rh-public) 的锚定名字为 "Rh-public"），

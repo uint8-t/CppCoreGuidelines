@@ -38,13 +38,9 @@ int use(int x)
     int i;
     char c;
     double d;
-```
 
-```cpp
     // ... 做一些事 ...
-```
 
-```cpp
     if (x < i) {
         // ...
         i = f(x, d);
@@ -56,7 +52,6 @@ int use(int x)
     return i;
 }
 ```
-
 未初始化变量和其使用点的距离越长，出现 BUG 的机会就越大。
 幸运的是，编译器可以发现许多“设值前使用”的错误。
 不幸的是，编译器无法捕捉到所有这样的错误，而且一些 BUG 并不都像这个小例子中的这样容易发现。
@@ -88,7 +83,6 @@ string sign(T x)
     return "zero";
 }
 ```
-
 为仅使用一个返回语句，我们得做类似这样的事：
 
 ```cpp
@@ -106,7 +100,6 @@ string sign(T x)        // 不好
     return res;
 }
 ```
-
 这不仅更长，而且很可能效率更差。
 越长越复杂的函数，对其进行变通就越是痛苦。
 当然许多简单的函数因为它们本来就简单的逻辑都天然就只有一个 `return`。
@@ -121,7 +114,6 @@ int index(const char* p)
     return i;
 }
 ```
-
 如果我们采纳这条规则的话，得做类似这样的事：
 
 ```cpp
@@ -136,7 +128,6 @@ int index2(const char* p)
     return i;
 }
 ```
-
 注意我们（故意地）违反了禁止未初始化变量的规则，因为这种风格通常都会导致这样。
 而且，这种风格也会倾向于采用 [goto exit](S-not.md#Rnr-goto-exit) 伪规则。
 
@@ -215,7 +206,6 @@ int index2(const char* p)
 ```cpp
 ???
 ```
-
 ##### 替代方案
 
 * [RAII](S-errors.md#Re-raii)
@@ -233,7 +223,6 @@ int index2(const char* p)
 ```cpp
 ???
 ```
-
 ##### 替代方案
 
 * 使用命名空间来包含逻辑上聚合的类和函数。
@@ -250,9 +239,7 @@ int index2(const char* p)
 
 ```cpp
 // 老式传统风格：有许多问题
-```
 
-```cpp
 class Picture
 {
     int mx;
@@ -268,20 +255,14 @@ public:
         data = nullptr; // 也不好：在构造函数中而非
                         // 成员初始化式中进行常量初始化
     }
-```
 
-```cpp
     ~Picture()
     {
         Cleanup();
     }
-```
 
-```cpp
     // ...
-```
 
-```cpp
     // 不好：两阶段初始化
     bool Init()
     {
@@ -295,9 +276,7 @@ public:
         data = (int*) malloc(mx*my*sizeof(int));   // 也不好：拥有原始指针，还用了 malloc
         return data != nullptr;
     }
-```
 
-```cpp
     // 也不好：没有理由让清理操作作为单独的函数
     void Cleanup()
     {
@@ -305,9 +284,7 @@ public:
         data = nullptr;
     }
 };
-```
 
-```cpp
 Picture picture(100, 0); // 此时 picture 尚未就绪可用
 // 这里将失败
 if (!picture.Init()) {
@@ -315,7 +292,6 @@ if (!picture.Init()) {
 }
 // 现在有一个无效的 picture 对象实例。
 ```
-
 ##### 示例，好
 
 ```cpp
@@ -324,18 +300,14 @@ class Picture
     int mx;
     int my;
     vector<int> data;
-```
 
-```cpp
     static int check_size(int size)
     {
         // 不变式检查
         Expects(size > 0);
         return size;
     }
-```
 
-```cpp
 public:
     // 更好的方式是以一个 2D 的 Size 类作为单个形参
     Picture(int x, int y)
@@ -346,29 +318,20 @@ public:
     {
         // 图片就绪可用
     }
-```
 
-```cpp
     // 编译器生成的析构函数会完成工作。（另见 C.21）
-```
 
-```cpp
     // ...
 };
-```
 
-```cpp
 Picture picture1(100, 100);
 // picture1 已就绪可用……
-```
 
-```cpp
 // y 并非有效大小值，
 // 缺省的契约违规行为将会调用 std::terminate
 Picture picture2(100, 0);
 // 不会抵达这里……
 ```
-
 ##### 替代方案
 
 * 始终在构造函数中建立类不变式。
@@ -396,7 +359,6 @@ exit:
     free(p);
 }
 ```
-
 请找出其中的 BUG。
 
 ##### 替代方案
@@ -417,7 +379,6 @@ exit:
 ```cpp
 ???
 ```
-
 ##### 替代方案
 
 * [使成员数据 `public` 或者（更好地）`private`](S-class.md#Rh-protected)。
