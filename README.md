@@ -1,53 +1,38 @@
-[![C++ 核心指导方针](cpp_core_guidelines_logo_text.png)](https://isocpp.github.io/CppCoreGuidelines)
+[![C++ 核心指南](cpp_core_guidelines_logo_text.png)](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 
-# [C++ 核心指导方针](http://lynnboy.github.io/CppCoreGuidelines-zh-CN/CppCoreGuidelines)
-
->"Within C++ is a smaller, simpler, safer language struggling to get out."
+>"在 C++ 内部，有一个更小、更简单、更安全的语言努力着想要显现。"
 >-- <cite>Bjarne Stroustrup</cite>
 
-[《C++ 核心指导方针》（The C++ Core Guidelines）](CppCoreGuidelines-zh-CN.md)，与 C++ 语言本身一样，是由 Bjarne Stroustrup 领导的协作项目。
-该指导方针是许多组织和团体之间耗费了大量人年的探讨和设计的心血成果。它们的设计着眼于普遍的适用性并鼓励广泛采纳，
-但您也可以对其进行随意的复制和修改，以满足您的团体组织自身的需要。
+由 Bjarne Stroustrup 领导的协作努力，正如 C++ 语言本身，[C++ 核心指南](CppCoreGuidelines.md)是众多组织多年讨论和设计的成果。它们的设计鼓励普遍适用性和广泛采纳，但您可以自由复制和修改这些准则，以满足您组织的需求。
 
-## 起步
+## 入门
 
-指导方针内容见 [CppCoreGuidelines](CppCoreGuidelines-zh-CN.md)。该文档为 [GH 风格 MarkDown 格式](https://github.github.com/gfm/)。我们有意维持文档简单，（英文原版）基本上是 ASCII，以便于进行诸如语言翻译和格式转换之类的自动化后处理。
-编写者们还维护了[一个适于浏览的版本](CppCoreGuidelines-zh-CN)。请注意它由人工集成，因而可能略晚于 master 分支的版本。
-[英文原版](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)。
+指南本身可以在 [C++ 核心指南](CppCoreGuidelines.md) 找到。该文档使用 [GH-flavored MarkDown](https://github.github.com/gfm/) 编写。它故意保持简单，主要使用 ASCII 字符，以便进行自动后处理，如语言翻译和重新格式化。编辑们维护了一个[为浏览而格式化的版本](http://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)。请注意，这是手动集成的，可能比 master 分支中的版本略旧。
 
-这些指导方针是持续不断演进的文档，并且没有严格的“发布”节奏。Bjarne Stroustrop 定期评审文档并增加导言部分的版本号。[增加版本号的签入](https://github.com/isocpp/CppCoreGuidelines/releases) 都在 git 中打了标签。
+C++ 核心指南是一个不断发展的文档，没有严格的“发布”节奏。Bjarne Stroustrup 定期审查文档，并在引言中增加版本号。[增加版本号的提交](https://github.com/isocpp/CppCoreGuidelines/releases)在 git 中被标记。
 
-其中有不少都用到了纯头文件的 Guidelines Support Library（指导方针支持库）。有一个实现在 [GSL：Guidelines Support Library](https://github.com/Microsoft/GSL)。
+许多准则使用了仅包含头文件的指南支持库。其中一个实现可在 [GSL: 指南支持库](https://github.com/Microsoft/GSL) 找到。
 
-## 背景和领域
+## 背景与范围
 
-这个指导方针的目标是帮助人们更有效地运用现代 C++ 语言。所谓“现代”的含义是指 C++11 和更新的版本。
-换句话说，如果你从现在开始算起，五年后你的代码看起来是怎么样的？十年呢？
+这些准则的目的是帮助人们有效地使用现代 C++。所谓的“现代 C++”是指 C++11 及更高版本。换句话说，考虑到您现在就可以开始，您希望您的代码在5年后、10年后会是什么样子？
 
-指南所关注的是一些相对比较高层次的问题，比如接口，资源管理，内存管理，以及并发等等。这样的规则会对应用的架构
-以及程序库的设计都造成影响。如果遵循这些规则，代码将会是静态类型安全的，没有资源泄露，并且能够捕捉到比当今的代码
-通常所能捕捉到的多得多的编程逻辑错误。还能更快速地运行——你不必牺牲程序的正确性。
+这些准则专注于相对较高层次的问题，如接口、资源管理、内存管理和并发。这些规则影响应用架构和库设计。遵循这些规则将导致代码在静态类型安全上有保障，不会有资源泄漏，并能捕捉到比现今代码中更多的编程逻辑错误。而且它将运行得非常快——你可以负担得起正确做事。
 
-我们对于如命名约定和缩进风格一类的低层次的问题不那么关注。当然，对程序员有帮助的任何话题都是可接受的。
+我们对低层次的问题（如命名约定和缩进风格）关注较少。然而，任何能帮助程序员的主题都不是禁区。
 
-我们最初的规则集合强调的是（各种形式的）安全性以及简单性，它们有些过于严格了。我们预期将会引入更多的例外情况，
-以便使它们更好地适应现实世界的需要。我们也需要更多的规则。
+我们最初的一组规则强调安全（各种形式）和简单。它们可能过于严格。我们预计将不得不引入更多的例外，以更好地适应现实世界的需求。我们还需要更多的规则。
 
-您可能会发现，有的规则与您的预期相反，甚至是与您的经验相违背。其实如果我们没建议您在任何方面改变您的编码风格，
-那其实就是我们的失败。请您尝试验证或者证伪这些规则吧！尤其是，我们十分期望让一些规则能够建立在真实的测量数据上，
-或者是一些更好的例子之上。
+您会发现某些规则与您的预期或甚至您的经验相反。如果我们没有建议您以任何方式改变您的编码风格，那我们就失败了！请尝试验证或反驳规则！特别是，我们非常希望我们的一些规则能够得到测量数据或更好的例子的支持。
 
-您可能会觉得一些规则很显然，甚至没有什么价值。但请记住，一份指导方针的目的之一就在于帮助那些经验不足的，或来自其他
-背景或使用其他语言的人，能够迅速行动起来。
+您会发现某些规则显而易见或甚至微不足道。请记住，指南的一个目的是帮助那些经验较少或来自不同背景或语言的人更快地达到速度。
 
-指导方针中的规则有意设计成可以由分析工具提供支持的。违反规则的代码会打上标记，以引用（或者链接）到相关的规则。
-您在开始编码前并不需要记住所有这些规则。
+这些规则旨在得到分析工具的支持。违反规则的情况将以引用（或链接）到相关规则的形式被标记出来。我们不期望您在尝试编写代码之前记住所有的规则。
 
-这些规则都是为了逐步引入一个代码库而设计的。我们计划建立这样的工具，并希望其他人也能提供它们。
+这些规则是为了逐步引入到代码库中准备的。我们计划构建支持这一点的工具，并希望其他人也会这样做。
 
-## 贡献与授权
+## 贡献和许可证
 
-十分欢迎大家提出意见和改进建议。随着我们的知识增长，随着语言和可用的程序库的改进，我们计划对这份文档不断进行修改和扩充。
-更多细节请见 [CONTRIBUTING](./CONTRIBUTING.md) 和 [LICENSE](./LICENSE)。
+我们非常欢迎评论和改进建议。随着我们对语言的理解和语言及可用库集的改进，我们计划修改和扩展这份文档。更多细节可以在 [CONTRIBUTING](./CONTRIBUTING.md) 和 [LICENSE](./LICENSE) 找到。
 
-感谢 [DigitalOcean](https://www.digitalocean.com/?refcode=32f291566cf7&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste) 存放标准 C++ 基金会网站。
+感谢 [DigitalOcean](https://www.digitalocean.com/?refcode=32f291566cf7&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste) 托管了标准 C++ 基金会网站。
