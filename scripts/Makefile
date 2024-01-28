@@ -6,7 +6,7 @@ MAKEFLAGS += --no-builtin-rules
 .SUFFIXES:
 
 BUILD_DIR=build
-SOURCEFILE = CppCoreGuidelines.md
+SOURCEFILE = CppCoreGuidelines-zh-cn.md
 SOURCEPATH = ../$(SOURCEFILE)
 
 .PHONY: default
