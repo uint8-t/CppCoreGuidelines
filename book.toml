@@ -1,0 +1,11 @@
+[book]
+authors = ["Bjarne Stroustrup","Herb Sutter","Li Yinan"]
+language = "zh"
+multilingual = false
+src = "src"
+title = "C++ 核心指南"
+
+[output.html]
+site-url = "/CppCoreGuidelines/"
+git-repository-url = "https://github.com/isocpp/CppCoreGuidelines"
+edit-url-template = "https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md"
