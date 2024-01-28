@@ -60,27 +60,27 @@ check-references: $(SOURCEPATH) $(BUILD_DIR) Makefile
 	@rm -f $(BUILD_DIR)/$(SOURCEFILE).uniq
 	@cat $(SOURCEPATH) | perl -ne 'print "$$1\n" if (/<a name="([^\"]+)/)' | sort | uniq -d > $(BUILD_DIR)/$(SOURCEFILE).uniq
 ## check if output has data
-	@if [ -s "build/CppCoreGuidelines.md.uniq" ]; then echo 'Found duplicate anchors:'; cat $(BUILD_DIR)/$(SOURCEFILE).uniq; false; fi
+	@if [ -s "build/CppCoreGuidelines-zh-cn.md.uniq" ]; then echo 'Found duplicate anchors:'; cat $(BUILD_DIR)/$(SOURCEFILE).uniq; false; fi
 
 .PHONY: check-notabs
 check-notabs: $(SOURCEPATH) $(BUILD_DIR) Makefile
 	@echo '##################### Tabs check ##################'
 # find lines with tabs
 # old file still might be around
-	@rm -f $(BUILD_DIR)/CppCoreGuidelines.md.tabs
+	@rm -f $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.tabs
 # print file, add line numbers, remove tabs from nl tool, grep for remaining tabs, replace with stars
 	@cat ../$(SOURCEFILE) | nl -ba | perl -pe 's/(^[^\t]*)\t/$1--/g' | perl -ne 'print if /\t/' | perl -pe 's/\t/\*\*\*\*/g' > $(BUILD_DIR)/$(SOURCEFILE).tabs
-	@if [ -s $(BUILD_DIR)/CppCoreGuidelines.md.tabs ]; then echo 'Warning: Tabs found:'; cat $(BUILD_DIR)/CppCoreGuidelines.md.tabs; false; fi;
+	@if [ -s $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.tabs ]; then echo 'Warning: Tabs found:'; cat $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.tabs; false; fi;
 
 .PHONY: check-badchars
 check-badchars: $(SOURCEPATH) $(BUILD_DIR) Makefile
 	@echo '##################### Bad chars check ##################'
 # find lines with tabs
 # old file still might be around
-	@rm -f $(BUILD_DIR)/CppCoreGuidelines.md.badchars
+	@rm -f $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.badchars
 # print file, add line numbers, grep for bad chars
 	@cat ../$(SOURCEFILE) | nl -ba | perl -ne 'print if /’|‘|”|“|¸| |–|…|¦/' > $(BUILD_DIR)/$(SOURCEFILE).badchars || true
-	@if [ -s $(BUILD_DIR)/CppCoreGuidelines.md.badchars ]; then echo 'Warning: Undesired chars (–’‘“”¸…¦) or Unicode EN SPACE found, use markdown-compatible symbols instead:'; cat $(BUILD_DIR)/CppCoreGuidelines.md.badchars; false; fi;
+	@if [ -s $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.badchars ]; then echo 'Warning: Undesired chars (–’‘“”¸…¦) or Unicode EN SPACE found, use markdown-compatible symbols instead:'; cat $(BUILD_DIR)/CppCoreGuidelines-zh-cn.md.badchars; false; fi;
 
 
 .PHONY: hunspell-check
