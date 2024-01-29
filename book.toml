@@ -9,3 +9,4 @@ title = "C++ 核心指南"
 site-url = "/CppCoreGuidelines/"
 git-repository-url = "https://github.com/isocpp/CppCoreGuidelines"
 edit-url-template = "https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md"
+additional-css = ["./theme/css/custom.css"]
