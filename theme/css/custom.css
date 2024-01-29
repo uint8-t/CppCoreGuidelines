@@ -68,7 +68,8 @@ code {
     font-family: var(--mono-font) !important;
     font-size: var(--code-font-size);
     direction: ltr !important;
-    font-feature-settings: "cv02", "ss01", "ss05", "ss03";
+    font-feature-settings: "cv02", "ss01", "ss05", "ss03"; 
+    font-variant-ligatures: none;
 }
 
 /*
