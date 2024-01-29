@@ -89,6 +89,7 @@ void read_and_print(istream& is)    // 读取并打印一个 int
         cerr << "no int on input\n";
 }
 ```
+
 `read_and_print` 的几乎每件事都有问题。
 它进行了读取，它（向一个固定 `ostream`）进行了写入，它（向一个固定的 `ostream`）写入了错误消息，它只能处理 `int`。
 这里没有可以重用的东西，逻辑上分开的操作被搅拌到了一起，而局部变量在其逻辑上使用完毕之后仍处于作用域中。
@@ -104,6 +105,7 @@ void read_and_print(istream& is)    // 读取并打印一个 int
 ```cpp
 sort(a, b, [](T x, T y) { return x.rank() < y.rank() && x.value() < y.value(); });
 ```
+
 对 lambda 进行命名，将会把这个表达式进行逻辑上的分解，还会为 lambda 的含义给出有力的提示。
 
 ```cpp
@@ -111,6 +113,7 @@ auto lessT = [](T x, T y) { return x.rank() < y.rank() && x.value() < y.value();
 
 sort(a, b, lessT);
 ```
+
 对于性能和可维护性来说，最简短的代码并不总是最好的选择。
 
 ##### 例外
@@ -144,6 +147,7 @@ void read_and_print()    // 不好
     cout << x << "\n";
 }
 ```
+
 这是一整块被绑定到一个特定的输入的代码，而且无法为其找到另一种（不同的）用途。作为代替，我们把函数分解为合适的逻辑部分并进行参数化：
 
 ```cpp
@@ -160,6 +164,7 @@ void print(ostream& os, int x)
     os << x << "\n";
 }
 ```
+
 这样的话，就可以在需要时进行组合：
 
 ```cpp
@@ -169,6 +174,7 @@ void read_and_print()
     print(cout, x);
 }
 ```
+
 如果有需要，我们还可以进一步把 `read()` 和 `print()` 针对数据类型，I/O 机制，以及对错误的反应等等方面进行模板化。例如：
 
 ```cpp
@@ -183,6 +189,7 @@ void print(auto& output, const auto& value)
     output << value << "\n";
 }
 ```
+
 ##### 强制实施
 
 * 把具有多个“输出”参数的函数当作有问题的。使用返回值来代替，包括以 `tuple` 用作多个返回值。
@@ -229,6 +236,7 @@ double simple_func(double val, int flag1, int flag2)
     return finalize(intermediate, 0.);
 }
 ```
+
 这个函数过于复杂了。
 要如何判断是否所有的可能性都被正确处理了呢？
 当然，它也同样违反了别的规则。
@@ -258,6 +266,7 @@ double simple_func(double val, int flag1, int flag2)
     return 0.;
 }
 ```
+
 ##### 注解
 
 “无法放入一屏显示”通常是对“太长了”的一种不错的实际定义方式。
@@ -295,6 +304,7 @@ constexpr int fac(int n)
     return x;
 }
 ```
+
 这个是 C++14。
 对于 C++11，请使用递归形式的 `fac()`。
 
@@ -314,6 +324,7 @@ void test(int v)
     constexpr int m4 = min(-1, v);  // 错误: 无法在编译期求值
 }
 ```
+
 ##### 注解
 
 不要试图让所有函数都变成 `constexpr`。
@@ -345,6 +356,7 @@ void test(int v)
 ```cpp
 inline string cat(const string& s, const string& s2) { return s + s2; }
 ```
+
 ##### 例外
 
 不要把 `inline` 函数加入需要变得稳定的接口中，除非你十分确定它不会再发生变化。
@@ -394,6 +406,7 @@ vector<string> collect(istream& is) noexcept
     return res;
 }
 ```
+
 如果 `collect()` 耗光了内存，程序就会崩溃。
 除非这个程序特别精心编写成不会耗尽内存，否则这也许正是正确的方式；
 `terminate()` 能够产生合适的错误日志信息（但当内存耗尽时是很难做出任何巧妙的事情的）。
@@ -459,6 +472,7 @@ void h(const unique_ptr<int>&);
 // 接受任何的 int
 void h(int&);
 ```
+
 ##### 示例，不好
 
 ```cpp
@@ -477,6 +491,7 @@ f(my_widget);
 widget stack_widget;
 f(stack_widget); // 错误
 ```
+
 ##### 示例，好
 
 ```cpp
@@ -495,6 +510,7 @@ f(*my_widget);
 widget stack_widget;
 f(stack_widget); // ok -- 这样就有效了
 ```
+
 ##### 注解
 
 我们可以静态地找出悬挂指针的许多常见情况（参见[生存期安全性剖面配置](S-profile.md#SS-lifetime)）。函数实参天然存活于函数调用的生存期，因而具有更少的生存期问题。
@@ -523,6 +539,7 @@ f(stack_widget); // ok -- 这样就有效了
 template<class T>
 auto square(T t) { return t * t; }
 ```
+
 ##### 强制实施
 
 不可能进行强制实施。
@@ -539,6 +556,7 @@ auto square(T t) { return t * t; }
 ```cpp
 widget* find(const set<widget>& s, const widget& w, Hint);   // 这里曾经使用过一个提示
 ```
+
 ##### 注解
 
 为解决这个问题，在 1980 年代早期就引入了允许形参无名的规则。
@@ -556,6 +574,7 @@ Value* find(const set<Value>& s, const Value& v, [[maybe_unused]] Hint h)
     }
 }
 ```
+
 ##### 强制实施
 
 对有名字的未使用形参进行标记。
@@ -591,6 +610,7 @@ auto x = find_if(vr.begin(), vr.end(),
     }
 );
 ```
+
 这里蕴含着一个有用的函数（大小写不敏感的字符串比较），lambda 的参数变大时总会这样。
 
 ```cpp
@@ -605,6 +625,7 @@ auto x = find_if(vr.begin(), vr.end(),
     [&](Rec& r) { return compare_insensitive(r.name, n); }
 );
 ```
+
 或者可以这样（如果你倾向于避免隐含绑定到 `n` 的名字）：
 
 ```cpp
@@ -614,6 +635,7 @@ auto x = find_if(vr.begin(), vr.end(),
     [](const Rec& r) { return cmp_to_n(r.name); }
 );
 ```
+
 ##### 注解
 
 函数、lambda 或运算符均如此。
@@ -641,6 +663,7 @@ auto earlyUsersEnd = std::remove_if(users.begin(), users.end(),
                                     [](const User &a) { return a.id > 100; });
 
 ```
+
 ##### 例外
 
 为 lambda 命名有助于明晰代码，即便它仅用一次。
@@ -699,6 +722,7 @@ void f3(int x);            // OK: 无可比拟
 
 void f4(const int& x);     // bad: f4() 中的访问带来开销
 ```
+
 （仅）对于高级的运用，如果你确实需要为“只当作输入”的参数的按右值传递进行优化的话：
 
 * 如果函数需要无条件地从参数进行移动，那就按 `&&` 来接受参数。参见 [F.18](S-functions.md#Rf-consume)。
@@ -716,6 +740,7 @@ string& concatenate(string&, const string& suffix);
 
 void sink(unique_ptr<widget>);  // 仅作输入，但移动了这个 widget 的所有权
 ```
+
 避免“为了效率”而按 `T&&` 来传递参数这类的“玄奥技巧”。
 关于按 `&&` 传递带来性能好处的大多数传言都是假的或者是脆弱的（不过也请参考 [F.18](S-functions.md#Rf-consume) 和 [F.19](S-functions.md#Rf-forward)）。
 
@@ -748,6 +773,7 @@ void sink(unique_ptr<widget>);  // 仅作输入，但移动了这个 widget 的�
 ```cpp
 void update(Record& r);  // 假定 update 将会写入 r
 ```
+
 ##### 注解
 
 一些用户定义和标准程序库的类型，如 `span<T>` 或迭代器等，
@@ -761,6 +787,7 @@ void increment_all(span<int> a)
     ++e;
 }
 ```
+
 ##### 注解
 
 `T&` 参数既可以向函数中传递信息，也可以传递出来。
@@ -779,6 +806,7 @@ void g()
     // ...
 }
 ```
+
 这里，`g()` 的作者提供了一个缓冲区让 `f()` 来填充，但 `f()` 仅仅替换掉了它（以多少比简单的字符复制高一些的成本）。
 如果 `g()` 的作者对 `buffer` 的大小作出了错误的假设的话，就会发生糟糕的逻辑错误。
 
@@ -803,6 +831,7 @@ void sink(vector<int>&& v)  // 无论参数所拥有的是什么，sink 都获�
     // 通常这里不再会使用 v 了；它已经被移走
 }
 ```
+
 注意，`std::move(v)` 使得 `store_somewhere()` 可以把 `v` 遗留为被移走的状态。
 [这可能很危险](S-class.md#Rc-move-semantic)。
 
@@ -820,6 +849,7 @@ void sink(std::unique_ptr<T> p)
     // 使用 p ... 可能在之后的什么地方 std::move(p)
 }   // p 被销毁
 ```
+
 ##### 例外
 
 当“将被移动”的形参是 `shared_ptr` 时，应遵循 [R.34](S-resource.md#Rr-sharedptrparam-owner)，并按值传递 `shared_ptr`。
@@ -849,6 +879,7 @@ inline auto invoke(F f, Args&&... args)
     return f(forward<Args>(args)...);
 }
 ```
+
 ##### 示例
 
 有时候，你可能会在每个静态控制流路径中按每个子对象一次的方式分段转发一个组合形参：
@@ -862,6 +893,7 @@ inline auto test(PairLike&& pairlike)
     f2(and, forward<PairLike>(pairlike).second, in, another, call);   // 转发 .second
 }
 ```
+
 ##### 强制实施
 
 * 对于接受 `TP&&` 参数的函数（其中的 `TP` 不是模板类型参数的名字），如果函数对它做了任何别的事，而不是在每个静态路径中都正好进行一次 `std::forward`，或者在每个静态路径中对其进行多次 `std::forward` 但限定为不同的数据成员均正好进行一次，就将函数进行标明。
@@ -885,6 +917,7 @@ vector<const int*> find_all(const vector<int>&, int x);
 // 不好: 把指向具有 x 值的元素的指针放入 out
 void find_all(const vector<int>&, vector<const int*>& out, int x);
 ```
+
 ##### 注解
 
 含有许多（每个都廉价移动的）元素的 `struct`，聚合起来则可能是移动操作昂贵的。
@@ -912,6 +945,7 @@ Matrix x = m1 + m2;  // 移动构造函数
 y = m3 + m3;         // 移动赋值
 
 ```
+
 ##### 注解
 
 返回值优化无法处理赋值的情况，不过移动赋值却可以。
@@ -930,6 +964,7 @@ void fill(Package&);  // OK
 int val();            // OK
 void val(int&);       // 不好: val 会不会读取参数？
 ```
+
 ##### 强制实施
 
 * 对于指代非 `const` 的引用参数，如果其被写入之前未进行过读取，而且其类型能够廉价地返回，则标记它们；它们应当是“输入”的返回值。
@@ -960,6 +995,7 @@ tuple<int, string> f(const string& input)
     return {status, something()};
 }
 ```
+
 C++98 的标准库已经使用这种风格了，因为 `pair` 就像一种两个元素的 `tuple` 一样。
 例如，给定一个 `set<string> my_set`，请考虑：
 
@@ -968,6 +1004,7 @@ C++98 的标准库已经使用这种风格了，因为 `pair` 就像一种两个
 result = my_set.insert("Hello");
 if (result.second) do_something_with(result.first);    // 变通方案
 ```
+
 在 C++11 中我们可以这样写，将结果直接放入现存的局部变量中：
 
 ```cpp
@@ -977,11 +1014,13 @@ Someothertype success;                        // 这些变量，则进行默认�
 tie(iter, success) = my_set.insert("Hello");   // 普通的返回值
 if (success) do_something_with(iter);
 ```
+
 而在 C++17 中，我们可以使用“结构化绑定”对多个变量进行声明和初始化：
 
 ```cpp
 if (auto [ iter, success ] = my_set.insert("Hello"); success) do_something_with(iter);
 ```
+
 ##### 例外
 
 有时候需要把对象传递给函数让其操纵它的状态。
@@ -996,6 +1035,7 @@ for (string s; in >> s; ) {
     // 对文本行做些事
 }
 ```
+
 这里，`s` 和 `in` 都用作了输入/输出参数。
 `in` 按（非 `const`）引用来传递，以便可以操作其状态。
 `s` 的传递是为避免重复进行分配。
@@ -1017,6 +1057,7 @@ for (auto p = get_string(cin); p.first; ) {
     // 对 p.second 做些事
 }
 ```
+
 我们觉得这样明显不够简洁，而且性能明显更差。
 
 当严格理解这条规则（F.21）时，这些例外并不真的算是例外，因为它依赖于输入/输出参数，
@@ -1040,6 +1081,7 @@ auto [value, unit] = measure(obj3); // 访问 value 和 unit；
                                     // 对于了解 measure() 的人来说有点多余
 auto [x, y] = measure(obj4);        // 请勿如此；这很可能造成混乱
 ```
+
 只有当返回的值表现的是几个无关实体而不是某个抽象的时候，才应使用过于通用的 `pair` 和 `tuple`。
 
 作为另一个例子，应当使用像 `variant<T, error_code>` 这样的专门的类型，而不使用通用的 `tuple`。
@@ -1058,6 +1100,7 @@ pair<LargeObject, LargeObject> f(const string& input)
     return { move(large1), move(large2) }; // 没有复制
 }
 ```
+
 还可以：
 
 ```cpp
@@ -1067,6 +1110,7 @@ pair<LargeObject, LargeObject> f(const string& input)
     return { g(input), h(input) }; // 没有复制，没有移动
 }
 ```
+
 请注意这与 [ES.56](S-expr.md#Res-move) 的 `return move(...)` 反模式是不同的。
 
 ##### 强制实施
@@ -1095,6 +1139,7 @@ void print(const vector<int>& r)
     // r 指代一个 vector<int>; 不需要检查
 }
 ```
+
 ##### 注解
 
 构造出一个本质上是 `nullptr` 的引用是可能的，但不是合法的 C++ 代码（比如，`T* p = nullptr; T& r = *p;`）。
@@ -1142,6 +1187,7 @@ void use(int* p, int n, char* s, int* q)
                     // 否则应当使用 owner
 }
 ```
+
 更好的做法
 
 ```cpp
@@ -1152,6 +1198,7 @@ void use2(span<int> p, zstring s, owner<int*> q)
     delete q;  // OK
 }
 ```
+
 ##### 注解
 
 `owner<T*>` 表示所有权，`zstring` 表示 C 风格的字符串。
@@ -1183,6 +1230,7 @@ void use2(span<int> p, zstring s, owner<int*> q)
 ```cpp
 int length(Record* p);
 ```
+
 当调用 `length(p)` 时，我应该先检查 `p` 是否为 `nullptr` 吗？是不是应当由 `length()` 的实现来检查 `p` 是否为 `nullptr`？
 
 ```cpp
@@ -1192,6 +1240,7 @@ int length(not_null<Record*> p);
 // length() 的实现者必须假定可能出现 p == nullptr
 int length(Record* p);
 ```
+
 ##### 注解
 
 假定 `not_null<T*>` 不可能是 `nullptr`；而 `T*` 则可能为 `nullptr`；二者都可以在内存中表示为 `T*`（因此不会带来运行时开销）。
@@ -1221,6 +1270,7 @@ vector<X> vec;
 // ...
 auto p = find({vec.begin(), vec.end()}, X{});  // 在 vec 中寻找 X{}
 ```
+
 ##### 注解
 
 范围（Range）在 C++ 代码中十分常见。典型情况下，它们都是隐含的，且非常难于保证它们能够被正确使用。
@@ -1248,6 +1298,7 @@ void f(span<int> s)
     std::sort(&s[0], &s[s.size() / 2]);
 }
 ```
+
 ##### 注解
 
 `span<T>` 对象并不拥有其元素，而且很小，可以按值传递。
@@ -1276,6 +1327,7 @@ C 风格的字符串非常普遍。它们是按一种约定方式定义的：就
 ```cpp
 int length(const char* p);
 ```
+
 当调用 `length(p)` 时，我应该先检查 `p` 是否为 `nullptr` 吗？是不是应当由 `length()` 的实现来检查 `p` 是否为 `nullptr`？
 
 ```cpp
@@ -1285,6 +1337,7 @@ int length(zstring p);
 // it is the caller's job to make sure p != nullptr
 int length(not_null<zstring> p);
 ```
+
 ##### 注解
 
 `zstring` 不含有所有权。
@@ -1314,6 +1367,7 @@ unique_ptr<Shape> get_shape(istream& is)  // 从输入流中装配一个形状
     }
 }
 ```
+
 ##### 注解
 
 当要传递的对象属于某个类层次，且将要通过接口（基类）来使用它时，你需要传递一个指针而不是对象。
@@ -1341,6 +1395,7 @@ std::thread t3 {shade, args3, bottom_right, im};
 // 脱离各线程
 // 最后执行完的线程会删除这个图像
 ```
+
 ##### 注解
 
 如果同时不可能超过一个所有者的话，优先采用 `unique_ptr` 而不是 `shared_ptr`。
@@ -1374,6 +1429,7 @@ Node* find(Node* t, const string& s)  // 在 Node 组成的二叉树中寻找 s
     return nullptr;
 }
 ```
+
 `find` 所返回的指针如果不是 `nullptr` 的话，就指定了一个含有 `s` 的 `Node`。
 重要的是，这里面并没有暗含着把所指向的对象的所有权传递给调用者。
 
@@ -1427,12 +1483,14 @@ void h()
     g(p);        // 把指向已丢弃栈帧的指针传递给函数（不好）
 }
 ```
+
 我在一种流行的实现上得到了以下输出：
 
 ```cpp
 *p == 999
 gx == 999
 ```
+
 我预期这样的结果是因为，对 `g()` 的调用重用了被 `f()` 的调用所丢弃的栈空间，因此 `*p` 所指代的空间应当会被 `gx` 所占据。
 
 * 请想象一下当 `fx` 和 `gx` 类型不同时会发生什么。
@@ -1454,6 +1512,7 @@ int& f()
     return x;  // 不好: 返回指代即将被销毁的对象的引用
 }
 ```
+
 ##### 注解
 
 这条仅适用于非 `static` 的局部变量。
@@ -1484,6 +1543,7 @@ int main()
     cout << *glob << '\n';
 }
 ```
+
 我这次成功从 `f` 的调用所丢弃的位置上读到了数据。
 存于 `glob` 中的指针可能在很晚才被使用，并可能以无法预测的方式造成各种麻烦。
 
@@ -1533,6 +1593,7 @@ void use()
     wheel& w0 = c.get_wheel(0); // w0 与 c 的生存期相同
 }
 ```
+
 ##### 强制实施
 
 对不存在可能产生 `nullptr` 的 `return` 表达式的函数进行标记。
@@ -1552,6 +1613,7 @@ void use()
 auto&& x = max(0, 1);   // 到目前为止，没问题
 foo(x);                 // 未定义的行为
 ```
+
 这种用法是频繁产生 bug 的根源，经常错误地报告为编译器错误。
 函数的实现者应避免为用户设置此类陷阱。
 
@@ -1575,6 +1637,7 @@ auto&& wrapper(F f)
     return f();          // 不好：返回一个临时对象的引用
 }
 ```
+
 更好的方式：
 
 ```cpp
@@ -1586,6 +1649,7 @@ auto wrapper(F f)
 }
 
 ```
+
 ##### 例外
 
 `std::move` 和 `std::forward` 确实会返回 `&&`，但它们只不过是强制转换 —— 只会按惯例在某些表达式上下文中使用，其中指代临时对象的引用只会在该临时对象被销毁之前在同一个表达式中被传递。我们不知道还存在任何别的返回 `&&` 的好例子。
@@ -1611,6 +1675,7 @@ auto wrapper(F f)
         std::cout << "This is the way to do it\n";
     }
 ```
+
 ##### 注解
 
 我们提出这条规则，只是因为这种错误持续存在于大众之间。
@@ -1650,6 +1715,7 @@ class Foo
     }
 };
 ```
+
 ##### 强制实施
 
 应当通过工具对所有赋值运算符的返回类型（和返回值）进行检查
@@ -1670,6 +1736,7 @@ S f()
   return std::move(result);
 }
 ```
+
 ##### 示例，好
 
 ```cpp
@@ -1679,6 +1746,7 @@ S f()
   return result;
 }
 ```
+
 ##### 强制实施
 
 应当通过工具对返回语句进行检查来强制实施。
@@ -1704,6 +1772,7 @@ void g(vector<int>& vx)
     // ...
 }
 ```
+
 要求对返回值添加 `const` 的理由是可以防止（非常少见的）对临时对象的意外访问。
 而反对的理由则是它妨碍了（非常常见的）对移动语义的利用。
 
@@ -1742,6 +1811,7 @@ for (int tasknum = 0; tasknum < max; ++tasknum) {
 }
 pool.join();
 ```
+
 ##### 例外
 
 泛型的 lambda 可以提供一种更精简的编写函数模板的方式，因此会比较有用，虽然普通的函数模板用稍多一点儿的语法可以做到同样的事情。这种优势在未来一旦所有的函数都获得了 Concept 参数的能力之后就可能会消失。
@@ -1766,12 +1836,14 @@ pool.join();
 ```cpp
 void print(const string& s, format f = {});
 ```
+
 相对的则是
 
 ```cpp
 void print(const string& s);  // 使用默认的 format
 void print(const string& s, format f);
 ```
+
 如果要为一组不同类型来实现语义上等价的操作，就不需要进行选择了。例如：
 
 ```cpp
@@ -1779,6 +1851,7 @@ void print(const char&);
 void print(int);
 void print(zstring);
 ```
+
 ##### 参见
 
 
@@ -1814,6 +1887,7 @@ std::for_each(begin(sockets), end(sockets), [&message](auto& socket)
     socket.send(message);
 });
 ```
+
 ##### 示例
 
 下面是一个简单的三阶段并行管线。每个 `stage` 对象封装了一个工作线程和一个队列，有一个用来把任务入队的 `process` 函数，且其析构函数会自动进行阻塞以在线程结束前等待队列变空。
@@ -1827,6 +1901,7 @@ void send_packets(buffers& bufs)
     for (auto& b : bufs) { decorator.process(b); }
 }  // 自动阻塞以等待管线完成
 ```
+
 ##### 强制实施
 
 对于按引用捕获的 lambda，若其并非局部地用在函数作用域中，或者若其被按引用传递给某个函数，则对其进行标记。（注意：这条规则是一种近似，但确实对按指针传递进行标记，它们更可能被受调方所保存，通过某个参数来向某个堆位置进行写入，返回 lambda，等等。生存期方面的规则也会提供一般性的规则，以针对包括通过 lambda 脱离的指针和引用进行标记。）
@@ -1848,6 +1923,7 @@ int local = 42;
 // process() 的调用将带有未定义行为！
 thread_pool.queue_work([&] { process(local); });
 ```
+
 ##### 示例，好
 
 ```cpp
@@ -1857,6 +1933,7 @@ int local = 42;
 // 函数调用的全部时间内可用。
 thread_pool.queue_work([=] { process(local); });
 ```
+
 ##### 注解
 
 如果必须捕获非局部指针，则应考虑使用 `unique_ptr`；它会处理生存期和同步问题。
@@ -1903,6 +1980,7 @@ class My_class {
     }
 };
 ```
+
 ##### 注解
 
 这在标准化之中正在进行积极的讨论，而且很可能在未来版本的标准中通过增加一种新的俘获模式或者调整 `[=]` 的含义而得到结局。当前的话，还是应当明确为好。
@@ -1942,6 +2020,7 @@ auto sum(Args... args) // 好，而且更灵活
 sum(3, 2); // ok: 5
 sum(3.14159, 2.71828); // ok: ~5.85987
 ```
+
 ##### 替代方案
 
 * 重载
@@ -1999,6 +2078,7 @@ void foo() {
     computeImportantThings(x);
 }
 ```
+
 ##### 示例
 
 ```cpp
@@ -2021,6 +2101,7 @@ void foo() {
     computeImportantThings(x);
 }
 ```
+
 ##### 强制实施
 
 标记多余的 `else`。

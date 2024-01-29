@@ -131,6 +131,7 @@ T sum2(vector<T>& v, T s)
     return s;
 }
 ```
+
 由于假设 `Incrementable` 并不支持 `+`，而 `Simple_number` 也不支持 `+=`，我们对 `sum1` 和 `sum2` 的实现者过度约束了。
 而且，这种情况下也错过了一次通用化的机会。
 
@@ -145,6 +146,7 @@ T sum(vector<T>& v, T s)
     return s;
 }
 ```
+
 通过假定 `Arithmetic` 同时要求 `+` 和 `+=`，我们约束 `sum` 的使用者来提供完整的算术类型。
 这并非是最小的要求，但它为算法的实现者更多所需的自由度，并确保了任何 `Arithmetic` 类型
 都可被用于各种各样的算法。
@@ -186,6 +188,7 @@ Iter find(Iter b, Iter e, Val v)
     // ...
 }
 ```
+
 ##### 注解
 
 除非确实需要多于一种模板参数类型，否则请不要使用模板。
@@ -216,6 +219,7 @@ class Vector {
 Vector<double> v(10);
 v[7] = 9.9;
 ```
+
 ##### 示例，不好
 
 ```cpp
@@ -228,6 +232,7 @@ class Container {
 Container c(10, sizeof(double));
 ((double*) c.elem)[7] = 9.9;
 ```
+
 这样做无法直接表现出程序员的意图，而且向类型系统和优化器隐藏了程序的结构。
 
 把 `void*` 隐藏在宏之中只会掩盖问题，并引入新的发生混乱的机会。
@@ -250,6 +255,7 @@ Container c(10, sizeof(double));
 ```cpp
 ???
 ```
+
 **例外**: ???
 
 ### <a name="Rt-generic-oo"></a>T.5: 结合泛型和面向对象技术来增强它们的能力，而不是它们的成本
@@ -273,6 +279,7 @@ class ConcreteCommand : public Command {
     // 实现虚函数
 };
 ```
+
 ##### 示例
 
 动态有助于静态：提供通用的，便利的，静态绑定的接口，但内部进行动态派发，这样就可以提供统一的对象布局。
@@ -320,6 +327,7 @@ public:
 Object o(Bar{});
 Object o2(Foo{});
 ```
+
 ##### 注解
 
 类模板之中，非虚函数仅会在被使用时才会实例化——而虚函数则每次都会实例化。
@@ -385,6 +393,7 @@ Iter find(Iter b, Iter e, Val v)
     // ...
 }
 ```
+
 也可以等价地用更为简洁的方式：
 
 ```cpp
@@ -395,6 +404,7 @@ Iter find(Iter b, Iter e, Val v)
     // ...
 }
 ```
+
 ##### 注解
 
 普通的 `typename`（或 `auto`）是受最少约束的概念。
@@ -427,6 +437,7 @@ concept Ordered_container = Sequence<T> && Random_access<Iterator<T>> && Ordered
 
 void sort(Ordered_container auto& s);
 ```
+
 这个 `Ordered_container` 貌似相当合理，但它和标准库中的 `sortable` 概念非常相似。
 它是更好？更正确？它真的精确地反映了标准对于 `sort` 的要求吗？
 直接使用 `sortable` 则更好而且更简单：
@@ -434,6 +445,7 @@ void sort(Ordered_container auto& s);
 ```cpp
 void sort(sortable auto& s);   // 更好
 ```
+
 ##### 注解
 
 在我们推进一个包含概念的 ISO 标准的过程中，“标准”概念的集合是不断演进的。
@@ -462,6 +474,7 @@ vector<string> v{ "abc", "xyz" };
 auto& x = v.front();        // 不好
 String auto& s = v.front(); // 好（String 是 GSL 的一个概念）
 ```
+
 ##### 强制实施
 
 * ???
@@ -486,6 +499,7 @@ void sort(T&);             // 为 Sortable 的类型 T”
 
 void sort(sortable auto&); // 最佳方式：“参数为 sortable”
 ```
+
 越简练的版本越符合我们的说话方式。注意许多模板不在需要使用 `template` 关键字了。
 
 ##### 强制实施
@@ -533,6 +547,7 @@ string xx = "7";
 string yy = "9";
 auto zz = algo(xx, yy);   // zz = "79"
 ```
+
 也许拼接是有意进行的。不过更可能的是一种意外。而对减法进行同等的定义则会导致可接受类型的集合的非常不同。
 这个 `Addable` 违反了加法应当可交换的数学法则：`a+b == b+a`。
 
@@ -562,6 +577,7 @@ string xx = "7";
 string yy = "9";
 auto zz = algo(xx, yy);   // 错误：string 不是 Number
 ```
+
 ##### 注解
 
 带有多个操作的概念要远比单个操作的概念更少和类型发生意外匹配的机会。
@@ -589,6 +605,7 @@ auto zz = algo(xx, yy);   // 错误：string 不是 Number
 ```cpp
 template<typename T> concept Subtractable = requires(T a, T b) { a - b; };
 ```
+
 这个是没有语义作用的。
 你至少还需要 `+` 来让 `-` 有意义和有用处。
 
@@ -625,6 +642,7 @@ void f(const Minimal& x, const Minimal& y)
     x += y;             // 意外！错误
 }
 ```
+
 这是最小化的设计，但会使用户遇到意外或受到限制。
 可能它还会比较低效。
 
@@ -656,6 +674,7 @@ void f(const Convenient& x, const Convenient& y)
     x += y;        // OK
 }
 ```
+
 定义所有的运算符也许很麻烦，但并不困难。
 理想情况下，语言应当默认提供比较运算符以支持这条规则。
 
@@ -686,6 +705,7 @@ template<typename T>
         { a / b } -> convertible_to<T>;
     };
 ```
+
 ##### 注解
 
 这是一种数学意义上的公理：可以假定成立而无需证明。
@@ -717,6 +737,7 @@ template<typename Node> concept Balancer = requires(Node* p) {
     detach(p);
 };
 ```
+
 这样 `Balancer` 就必须为树的 `Node` 至少提供这些操作，
 但我们还是无法指定详细的语义，因为一种新种类的平衡树可能需要更多的操作，
 而在设计的早期阶段，很难确定把对于所有节点的精确的一般语义所确定下来。
@@ -747,6 +768,7 @@ template<typename I>
 // 注：<iterator> 中定义了 forward_iterator
 concept Fwd_iter = Input_iter<I> && requires(I iter) { iter++; };
 ```
+
 编译器可以基于所要求的操作的集合（这里为前缀 `++`）来确定提炼关系。
 这样做减少了这些类型的实现者的负担，
 因为他们不再需要任何特殊的声明来“打入概念内部”了。
@@ -775,6 +797,7 @@ template<typename I>    // 提供对连续数据的随机访问的迭代器
 concept Contiguous_iter =
     RA_iter<I> && is_contiguous_v<I>;  // 使用 is_contiguous 特征
 ```
+
 程序员（在程序库中）必须适当地定义（特征） `is_contiguous`。
 
 把标签类包装到概念中可以得到这个方案的更简单的表达方式：
@@ -785,6 +808,7 @@ template<typename I> concept Contiguous = is_contiguous_v<I>;
 template<typename I>
 concept Contiguous_iter = RA_iter<I> && Contiguous<I>;
 ```
+
 程序员（在程序库中）必须适当地定义（特征） `is_contiguous`。
 
 ##### 注解
@@ -818,6 +842,7 @@ template<typename T>
     requires C<T>
 void f();
 ```
+
 这样会好得多：
 
 ```cpp
@@ -828,6 +853,7 @@ template<typename T>   // 用概念进行特化
     requires C<T>
 void f();
 ```
+
 仅当 `C<T>` 无法满足时，编译器将会选择无约束的模板。
 如果你并不想（或者无法）定义无约束版本的
 `f()` 的话，你可以删掉它。
@@ -836,6 +862,7 @@ void f();
 template<typename T>
 void f() = delete;
 ```
+
 编译器将会选取这个重载，或者给出一个适当的错误。
 
 ##### 注解
@@ -852,6 +879,7 @@ enable_if<C<T>, void>
 f();
 
 ```
+
 ##### 注解
 
 有时候会（不正确地）把对单个要求的互补约束当做是可以接受的。
@@ -863,6 +891,7 @@ C1<T> && C2<T>
 C1<T> && !C2<T>
 !C1<T> && !C2<T>
 ```
+
 这样，犯错的机会也会倍增。
 
 ##### 强制实施
@@ -883,6 +912,7 @@ C1<T> && !C2<T>
 ```cpp
 template<typename T> concept Equality = has_equal<T> && has_not_equal<T>;
 ```
+
 显然，直接使用标准的 `equality_comparable` 要更好而且更容易，
 但是——只是一个例子——如果你不得不定义这样的概念的话，应当这样：
 
@@ -894,6 +924,7 @@ template<typename T> concept Equality = requires(T a, T b) {
     // axiom { a = b; => a == b }  // => 的意思是“意味着”
 };
 ```
+
 而不是定义两个无意义的概念 `has_equal` 和 `has_not_equal` 仅用于帮助 `Equality` 的定义。
 “无意义”的意思是我们无法独立地指定 `has_equal` 的语义。
 
@@ -928,12 +959,14 @@ auto x = find_if(v, greater_than_7);                 // 函数指针：不灵活
 auto y = find_if(v, [](double x) { return x > 7; }); // 函数对象：携带所需数据
 auto z = find_if(v, Greater_than<double>(7));        // 函数对象：携带所需数据
 ```
+
 当然，也可以使用 `auto` 或概念来使这些函数通用化。例如：
 
 ```cpp
 auto y1 = find_if(v, [](totally_ordered auto x) { return x > 7; }); // 要求一种有序类型
 auto z1 = find_if(v, [](auto x) { return x > 7; });                 // 期望类型带有 >
 ```
+
 ##### 注解
 
 Lambda 会生成函数对象。
@@ -966,6 +999,7 @@ void sort(sortable auto& s)  // 对序列 s 进行排序
     if (debug) cerr << "exit sort( " << s <<  ")\n";
 }
 ```
+
 是否该把它重写为：
 
 ```cpp
@@ -978,6 +1012,7 @@ void sort(S& s)  // 对序列 s 进行排序
     if (debug) cerr << "exit sort( " << s <<  ")\n";
 }
 ```
+
 毕竟，`sortable` 里面并没有要求任何 `iostream` 支持。
 而另一方面，在排序的基本概念中也没有任何东西是有关于调试的。
 
@@ -1024,6 +1059,7 @@ class Matrix {
     // ...
 };
 ```
+
 这免除了 `Matrix` 的用户必须了解其元素是存储于 `vector` 之中，而且也免除了用户重复书写 `typename std::vector<T>::`。
 
 ##### 示例
@@ -1041,6 +1077,7 @@ template<typename T>
 using Value_type = typename container_traits<T>::value_type;
 
 ```
+
 这免除了 `Value_type` 的用户必须了解用于实现 `value_type` 的技术。
 
 ```cpp
@@ -1052,6 +1089,7 @@ void user2(T& c)
     // ...
 }
 ```
+
 ##### 注解
 
 一种简洁的常用说法是：“包装特征！”
@@ -1082,6 +1120,7 @@ typedef int (*PFT)(T);      // 错误
 template<typename T>
 using PFT2 = int (*)(T);   // OK
 ```
+
 ##### 强制实施
 
 * 标记 `typedef` 的使用。不过这样会出现大量的“命中” :-(
@@ -1098,6 +1137,7 @@ using PFT2 = int (*)(T);   // OK
 tuple<int, string, double> t1 = {1, "Hamlet", 3.14};   // 明确类型
 auto t2 = make_tuple(1, "Ophelia"s, 3.14);         // 更好；推断类型
 ```
+
 注意这里用 `s` 后缀来确保字符串是 `std::string` 而不是 C 风格字符串。
 
 ##### 注解
@@ -1112,6 +1152,7 @@ auto t2 = make_tuple(1, "Ophelia"s, 3.14);         // 更好；推断类型
 vector<double> v = { 1, 2, 3, 7.9, 15.99 };
 list<Record*> lst;
 ```
+
 ##### 注解
 
 注意，C++17 强允许模板参数直接从构造函数参数进行推断，而使这条规则变得多余：
@@ -1121,6 +1162,7 @@ list<Record*> lst;
 ```cpp
 tuple t1 = {1, "Hamlet"s, 3.14}; // 推断为：tuple<int, string, double>
 ```
+
 ##### 强制实施
 
 当显式指定的类型与所使用的类型精确匹配时进行标记。
@@ -1151,6 +1193,7 @@ X x {1};              // 没问题
 X y = x;              // 没问题
 std::vector<X> v(10); // 错误: 没有默认构造函数
 ```
+
 ##### 注解
 
 `SemiRegular` 要求可以默认构造。
@@ -1188,6 +1231,7 @@ namespace T0 {
     }
 }
 ```
+
 这将会打印出 `T0` 和 `Bad`。
 
 这里 `Bad` 中的 `==` 有意设计为造成问题，不过你是否在真实代码中发现过这个问题呢？
@@ -1237,6 +1281,7 @@ void f(T v)
     // ...
 }
 ```
+
 ##### 注解
 
 请当心[互补约束](S-templates.md#Rt-not)。
@@ -1257,6 +1302,7 @@ void f(T v)
 ```cpp
 ???
 ```
+
 **例外**: 有时候类型擦除是合适的，比如 `std::function`。
 
 ##### 强制实施
@@ -1301,6 +1347,7 @@ Iter algo(Iter first, Iter last)
     }
 }
 ```
+
 ##### 注解
 
 通常模板是放在头文件中的，因此相对于 `.cpp` 文件之中的函数来说，其上下文依赖更加会受到 `#include` 的顺序依赖的威胁。
@@ -1349,6 +1396,7 @@ private:
 List<int> lst1;
 List<int, My_allocator> lst2;
 ```
+
 这看起来没什么问题，但现在 `Link` 形成依赖于分配器（尽管它不使用分配器）。 这迫使冗余的实例化在某些现实场景中可能造成出奇的高的成本。
 通常，解决方案是使用自己的最小模板参数集使嵌套类非局部化。
 
@@ -1376,6 +1424,7 @@ private:
 List2<int> lst1;
 List2<int, My_allocator> lst2;
 ```
+
 人们发现 `Link` 不再隐藏在列表中很可怕，所以我们命名这个技术为 [SCARY](http://www.open-std.org/jtc1/sc22/WG21/docs/papers/2009/n2911.pdf)。
 引自该学术论文：“首字母缩略词 SCARY 描述了看似错误的赋值和初始化（受冲突的通用参数的约束），
 但实际上使用了正确的实现（由于最小化的依赖而不受冲突的约束）。”
@@ -1406,6 +1455,7 @@ public:
     // ...
 };
 ```
+
 ???
 
 ```cpp
@@ -1420,6 +1470,7 @@ public:
     // ...
 };
 ```
+
 ##### 注解
 
 这条规则的更一般化的版本是，
@@ -1446,6 +1497,7 @@ public:
 
 ??? 表示特化？
 ```
+
 ##### 注解
 
 ???
@@ -1498,6 +1550,7 @@ void use(vector<int>& vi, vector<int>& vi2, vector<string>& vs, vector<string>& 
     copy(vs.begin(), vs.end(), vs2.begin()); // 使用调用复制构造函数的循环
 }
 ```
+
 这是一种进行编译时算法选择的通用且有力的技巧。
 
 ##### 注解
@@ -1518,6 +1571,7 @@ Out copy_helper(In, first, In last, Out out)
     // 使用调用复制构造函数的循环
 }
 ```
+
 ##### 强制实施
 
 ???
@@ -1534,6 +1588,7 @@ Out copy_helper(In, first, In last, Out out)
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -1557,6 +1612,7 @@ void f(T t, U u)
 
 f(1, "asdf"); // 不好：从 const char* 强制转换为 int
 ```
+
 ##### 强制实施
 
 * 标记 `()` 初始化式。
@@ -1597,6 +1653,7 @@ void test3(T t)
                           // 以获得非默认的函数和类型
 }
 ```
+
 特征通常是用以计算一个类型的类型别名，
 用以计算一个值的 `constexpr` 函数，
 或者针对用户的类型进行特化的传统的特征模板。
@@ -1646,6 +1703,7 @@ public:
 Vector<int> vi;
 Vector<string> vs;
 ```
+
 把 `sort` 定义为容器的成员函数可能是一个比较糟糕的主意，不过这样做并不鲜见，而且它是一个展示不应当做的事情的好例子。
 
 在这之中，编译器不知道 `Vector<int>::sort()` 是不是会被调用，因此它必须为之生成代码。
@@ -1685,6 +1743,7 @@ maul(aa);
 Apple& a0 = &aa[0];   // 是 Pear 吗？
 Apple& a1 = &aa[1];   // 是 Pear 吗？
 ```
+
 `aa[0]` 可能会变为 `Pear`（并且没进行过强制转换！）。
 当 `sizeof(Apple) != sizeof(Pear)` 时，对 `aa[1]` 的访问就是并未跟数组中的对象的适当起始位置进行对齐的。
 这里出现了类型违例，以及很可能出现的内存损坏。
@@ -1707,6 +1766,7 @@ maul2(&va[0]);   // 这是你明确要做的
 
 Apple& a0 = &va[0];   // 是 Pear 吗？
 ```
+
 注意，`maul2()` 中的赋值违反了[避免发生切片的规则](S-expr.md#Res-slice)。
 
 ##### 强制实施
@@ -1724,6 +1784,7 @@ Apple& a0 = &va[0];   // 是 Pear 吗？
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -1745,6 +1806,7 @@ class Shape {
     virtual bool intersect(T* p);   // 错误：模板不能为虚
 };
 ```
+
 ##### 注解
 
 我们保留这条规则是因为人们总是问这个问题。
@@ -1797,6 +1859,7 @@ public:
 List<int> li;
 List<string> ls;
 ```
+
 这样的话就只有一份用于对 `List` 的元素进行入链和解链的操作的代码了。
 而类 `Link` 和 `List` 除了进行类型操作之外什么也没做。
 
@@ -1823,6 +1886,7 @@ List<string> ls;
 ```cpp
 ??? printf
 ```
+
 ##### 强制实施
 
 * 对用户代码中 `va_arg` 的使用进行标记。
@@ -1838,6 +1902,7 @@ List<string> ls;
 ```cpp
 ??? 当心仅能移动参数和引用参数
 ```
+
 ##### 强制实施
 
 ???
@@ -1853,6 +1918,7 @@ List<string> ls;
 ```cpp
 ??? 转发参数，类型检查，引用
 ```
+
 ##### 强制实施
 
 ???
@@ -1868,6 +1934,7 @@ List<string> ls;
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -1894,11 +1961,13 @@ List<string> ls;
 ```cpp
 ???
 ```
+
 ##### 示例，不好
 
 ```cpp
 enable_if
 ```
+
 请使用概念来替代它。不过请参见[如何在没有语言支持时模拟概念](S-templates.md#Rt-emulate)。
 
 ##### 示例
@@ -1906,6 +1975,7 @@ enable_if
 ```cpp
 ??? 好例子
 ```
+
 **替代方案**: 如果结果是一个值而不是类型，请使用 [`constexpr` 函数](S-templates.md#Rt-fct)。
 
 ##### 注解
@@ -1930,6 +2000,7 @@ template<typename Iter>
     /*requires*/ enable_if<forward_iterator<Iter>, void>
 advance(Iter p, int n) { assert(n >= 0); while (n--) ++p;}
 ```
+
 ##### 注解
 
 这种代码使用概念时将更加简单：
@@ -1939,6 +2010,7 @@ void advance(random_access_iterator auto p, int n) { p += n; }
 
 void advance(forward_iterator auto p, int n) { assert(n >= 0); while (n--) ++p;}
 ```
+
 ##### 强制实施
 
 ???
@@ -1958,6 +2030,7 @@ void advance(forward_iterator auto p, int n) { assert(n >= 0); while (n--) ++p;}
 ```cpp
 ??? 大型对象 / 小型对象的优化
 ```
+
 ##### 强制实施
 
 ???
@@ -1987,6 +2060,7 @@ constexpr T pow(T v, int n)   // 幂/指数
 
 constexpr auto f7 = pow(pi, 7);
 ```
+
 ##### 强制实施
 
 * 对产生值的模板元程序进行标记。它们应当被替换成 `constexpr` 函数。
@@ -2002,6 +2076,7 @@ constexpr auto f7 = pow(pi, 7);
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -2018,6 +2093,7 @@ constexpr auto f7 = pow(pi, 7);
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -2043,6 +2119,7 @@ constexpr auto f7 = pow(pi, 7);
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -2066,6 +2143,7 @@ for (auto i = first; i != last; ++i) {   // 好; 通用性较强
     // ...
 }
 ```
+
 当然，范围式 `for` 在符合需求的时候当然是更好的选择。
 
 ##### 示例
@@ -2103,6 +2181,7 @@ void my_func(Base& param)
     use(param.g());
 }
 ```
+
 ##### 强制实施
 
 * 对使用 `<` 而不是 `!=` 的迭代器比较进行标记。
@@ -2120,6 +2199,7 @@ void my_func(Base& param)
 ```cpp
 ???
 ```
+
 **例外**: 当确实有特化函数模板的恰当理由时，请只编写一个函数模板，并使它委派给一个类模板，然后对这个类模板进行特化（这提供了编写部分特化的能力）。
 
 ##### 强制实施
@@ -2145,6 +2225,7 @@ public:
     // ...
 };
 ```
+
 在别的地方，也许是某个实现文件中，可以让编译器来检查 `X` 的所需各项性质：
 
 ```cpp
@@ -2152,6 +2233,7 @@ static_assert(Default_constructible<X>);    // 错误: X 没有默认构造函�
 static_assert(Copyable<X>);                 // 错误: 忘记定义 X 的移动构造函数了
 
 ```
+
 ##### 强制实施
 
 不可行。

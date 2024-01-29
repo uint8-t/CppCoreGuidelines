@@ -73,6 +73,7 @@ void use()
     // ...
 }
 ```
+
 这里，`vector` 和 `string` 的构造函数可能无法为其元素分配足够的内存，`vector` 的构造函数可能无法复制其初始化式列表中的 `Thing`，而 `File_handle` 可能无法打开所需的文件。
 这些情况中，它们都会抛出异常来让 `use()` 的调用者来处理。
 如果 `use()` 可以处理这种构造 `bar` 的故障的话，它可以用 `try`/`catch` 来控制。
@@ -89,6 +90,7 @@ File_handle::File_handle(const string& name, const string& mode)
         throw runtime_error{"File_handle: could not open " + name + " as " + mode"}
 }
 ```
+
 ##### 注解
 
 人们通常说异常应当用于表明意外的事件和故障。
@@ -144,6 +146,7 @@ int find_index(vector<string>& vec, const string& x)
     return -1;   // 未找到
 }
 ```
+
 这种代码要比显然的替代方式更加复杂，而且极可能运行慢得多。
 在 `vector` 中寻找一个值是没什么意外情况的。
 
@@ -189,6 +192,7 @@ private:
     int sz;
 };
 ```
+
 类不变式——这里以代码注释说明——是由构造函数建立的。
 当 `new` 无法分配所需的内存时将抛出异常。
 各运算符，尤其是下标运算符，都是依赖于这个不变式的。
@@ -218,6 +222,7 @@ void f1(int i)   // 不好: 可能会泄漏
     // ...
 }
 ```
+
 我们可以在抛出异常前小心地释放资源：
 
 ```cpp
@@ -232,6 +237,7 @@ void f2(int i)   // 笨拙且易错: 显式的释放
     // ...
 }
 ```
+
 这样很啰嗦。在更大型的可能带有多个 `throw` 的代码中，显式的释放将变得重复且易错。
 
 ```cpp
@@ -243,6 +249,7 @@ void f3(int i)   // OK: 通过资源包装来进行资源管理（请见下文�
     // ...
 }
 ```
+
 注意即使 `throw` 是在所调用的函数中暗中发生，这也能正常工作：
 
 ```cpp
@@ -254,6 +261,7 @@ void f4(int i)   // OK: 通过资源包装来进行资源管理（请见下文�
     // ...
 }
 ```
+
 除非你确实需要指针语义，否则还是应当使用局部的资源对象：
 
 ```cpp
@@ -265,6 +273,7 @@ void f5(int i)   // OK: 通过局部对象来进行资源管理
     // ...
 }
 ```
+
 这即简单又安全，而且通常更加高效。
 
 ##### 注解
@@ -308,6 +317,7 @@ void f()
     // ...
 } // 析构函数如常进行清理
 ```
+
 显然这样做增加了代码大小，不允许隐式的“异常”（`valid()` 检查）传播，而且 `valid()` 检查可能被忘掉。
 优先采用异常。
 
@@ -347,6 +357,7 @@ double compute(double d) noexcept
     return log(sqrt(d <= 0 ? 1 : d));
 }
 ```
+
 这里，我们已知 `compute` 不会抛出异常，因为它仅由不会抛出异常的操作所组成。
 通过将 `compute` 声明为 `noexcept`，让编译器和人类阅读者获得信息，使其更容易理解和操作 `compute`。
 
@@ -363,6 +374,7 @@ vector<double> munge(const vector<double>& v) noexcept
     // ... 做一些事 ...
 }
 ```
+
 这里的 `noexcept` 表明我不希望或无法处理无法构造局部的 `vector` 对象的情形。
 也就是说，我认为内存耗尽是一种严重的设计错误（类比于硬件故障），因此我希望当其发生时让程序崩溃。
 
@@ -391,6 +403,7 @@ void leak(int x)   // 请勿如此: 可能泄漏
     delete p;   // 可能不会执行到这里
 }
 ```
+
 避免这种问题的一种方法是坚持使用资源包装：
 
 ```cpp
@@ -402,6 +415,7 @@ void no_leak(int x)
     // 无须 delete p
 }
 ```
+
 另一种（通常更好）的方案是使用一个局部变量来消除指针的显式使用：
 
 ```cpp
@@ -411,6 +425,7 @@ void no_leak_simplified(int x)
     // ...
 }
 ```
+
 ##### 注解
 
 如果有需要清理的某个局部“东西”，但其并未表示为带有析构函数的对象，则这样的清理
@@ -433,6 +448,7 @@ throw "something bad";  // 不好
 
 throw std::exception(); // 不好 - 未提供信息
 ```
+
 从 `std::exception` 派生，能够获得选择捕获特定异常或者通过 `std::exception` 进行通盘处理的灵活性：
 
 ```cpp
@@ -447,6 +463,7 @@ public:
 
 throw MyException("something bad");  // 好
 ```
+
 异常可以不必派生于 `std::exception`：
 
 ```cpp
@@ -456,6 +473,7 @@ class MyCustomError final {};  // 并未派生于 std::exception
 
 throw MyCustomError{};  // 好 - 处理器必须捕获这个类型（或 ...）
 ```
+
 当检测位置没有可以添加的有用信息时，可以使用派生于 `exception`
 的库类型作为通用类型：
 
@@ -466,6 +484,7 @@ throw std::runtime_error{"someting bad"}; // 好
 
 throw std::invalid_argument("i is not even"); // 好
 ```
+
 也可以使用 `enum` 类：
 
 ```cpp
@@ -473,6 +492,7 @@ enum class alert {RED, YELLOW, GREEN};
 
 throw alert::RED; // 好
 ```
+
 ##### 强制实施
 
 识别针对内建类型和 `std::exception` 的 `throw`。
@@ -498,16 +518,19 @@ void f()
     }
 }
 ```
+
 可以代之以引用：
 
 ```cpp
 catch (base_class& e) { /* ... */ }
 ```
+
 或者（通常更好的）`const` 引用：
 
 ```cpp
 catch (const base_class& e) { /* ... */ }
 ```
+
 大多数处理器并不会改动异常，一般情况下我们都会[建议使用 `const`](S-expr.md#Res-const)。
 
 ##### 注解
@@ -542,6 +565,7 @@ public:
     }
 };
 ```
+
 ##### 注解
 
 许多人都曾试图编写违反这条规则的可靠代码，比如当网络连接“拒绝关闭”的情形。
@@ -593,6 +617,7 @@ void f()   // 不好
     }
 }
 ```
+
 ##### 强制实施
 
 * 标记嵌套的 `try` 块。
@@ -622,6 +647,7 @@ void f(zstring s)
     }
 }
 ```
+
 这段代码很混乱。
 可能在 `try` 块中的裸指针上发生泄漏。
 不是所有的异常都被处理了。
@@ -634,6 +660,7 @@ void f2(zstring s)
     Gadget g {s};
 }
 ```
+
 ##### 替代方案
 
 * 合适的资源包装以及 [RAII](S-errors.md#Re-raii)
@@ -659,6 +686,7 @@ void f(int n)
     // ...
 }
 ```
+
 ##### 注解
 
 `finally` 没有 `try`/`catch` 那样混乱，但它仍然比较专门化。
@@ -717,6 +745,7 @@ void func(zstring arg)
     // ...
 }
 ```
+
 当这个 `g` 并未正确构造时，`func` 将以一个异常退出。
 当无法抛出异常时，我们可以通过向 `Gadget` 添加 `valid()` 成员函数来模拟 RAII 风格的资源包装：
 
@@ -729,6 +758,7 @@ error_indicator func(zstring arg)
     return 0;   // 零代表“正常”
 }
 ```
+
 显然问题现在变成了调用者必须记得测试其返回值。考虑添加 `[[nodiscard]]` 以鼓励这样的做法。
 
 **参见**: [讨论](#???)
@@ -766,6 +796,7 @@ void f(int n)
     // ...
 }
 ```
+
 大多数程序都无法得体地处理内存耗尽。这大略上等价于
 
 ```cpp
@@ -776,6 +807,7 @@ void f(int n)
     // ...
 }
 ```
+
 通常，在退出之前将“崩溃”的原因记录日志是个好主意。
 
 ##### 强制实施
@@ -819,6 +851,7 @@ void user()
     // ...
 }
 ```
+
 这种方案符合[模拟 RAII 资源管理](S-errors.md#Re-no-throw-raii)。
 `valid()` 函数可以返回一个 `error_indicator`（比如说 `error_indicator` 枚举的某个成员）。
 
@@ -844,6 +877,7 @@ void user()
     // ...
 }
 ```
+
 可见，`std::pair` 是一种可能的返回类型。
 某些人则更喜欢专门的类型。
 例如：
@@ -864,6 +898,7 @@ void user()
     // ...
 }
 ```
+
 倾向于专门返回类型的一种原因是为其成员提供命名，而不是使用多少有些隐秘的 `first` 和 `second`,
 而且可以避免与 `std::pair` 的其他使用相混淆。
 
@@ -901,6 +936,7 @@ std::pair<int, error_indicator> user()
     return {res, 0};
 }
 ```
+
 模拟 RAII 可能不那么简单，尤其是在带有多个资源和多种可能错误的函数之中。
 一种较为常见的技巧是把清理都集中到函数末尾以避免重复（注意这里本不必为 `g2` 增加一层作用域，但是编译 `goto` 版本却需要它）：
 
@@ -939,6 +975,7 @@ g1_exit:
     return {res,err};
 }
 ```
+
 函数越大，这种技巧就越有吸引力。
 `finally` 可以[略微缓解这个问题](S-errors.md#Re-finally)。
 而且，程序变得越大，系统化地采用一中基于错误指示的错误处理策略就越加困难。
@@ -975,6 +1012,7 @@ void f(int n)
     // ...
 }
 ```
+
 ##### 注解
 
 C 风格的错误处理就是基于全局变量 `errno` 的，因此基本上不可能完全避免这种风格。
@@ -1001,6 +1039,7 @@ int use(int arg)
     // ...
 }
 ```
+
 当 `f()` 抛出了不同于 `X` 和 `Y` 的异常时将会执行未预期异常处理器，其默认将终止程序。
 这没什么问题，但假定我们检查过着并不会发生而 `f` 则被改写为抛出某个新异常 `Z`，
 这样将导致程序崩溃，除非我们改写 `use()`（并重新测试所有东西）。
@@ -1051,6 +1090,7 @@ void f()
     catch (std::exception& e) { /* ... */ }
 }
 ```
+
 若 `Derived` 派生自 `Base` 则 `Derived` 的处理器永远不会被执行。
 “捕获任何东西”的处理器保证 `std::exception` 的处理器永远不会被执行。
 

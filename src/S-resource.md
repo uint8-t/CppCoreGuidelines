@@ -70,6 +70,7 @@ void send(X* x, string_view destination)
     delete x;
 }
 ```
+
 这段代码中，你必须记得在所有路径中调用 `unlock`、`close_port` 和 `delete`，并且每个都恰好调用一次。
 而且，一旦上面标有 `...` 的任何代码抛出了异常，`x` 就会泄漏，而 `my_mutex` 则保持锁定。
 
@@ -87,6 +88,7 @@ void send(unique_ptr<X> x, string_view destination)  // x 拥有这个 X
     // ...
 } // 自动解锁 my_mutex 并删除 x 中的指针
 ```
+
 现在所有的资源清理都是自动进行的，不管是否发生了异常，所有路径中都会执行一次。额外的好处是，该函数现在明确声称它将接过指针的所有权。
 
 `Port` 又是什么呢？是一个封装资源的便利句柄：
@@ -104,6 +106,7 @@ public:
     Port& operator=(const Port&) = delete;
 };
 ```
+
 ##### 注解
 
 一旦发现一个“表现不良”的资源并未以带有析构函数的类来表示，就用一个类来包装它，或者使用 [`finally`](S-errors.md#Re-finally)。
@@ -127,6 +130,7 @@ void f(int* p, int n)   // n 为 p[] 中的元素数量
     // ...
 }
 ```
+
 编译期不会读注释，而如果不读其他代码的话你也无法指导 `p` 是否真的指向了 `n` 个元素。
 应当代之以 `span`。
 
@@ -138,6 +142,7 @@ void g(int* p, int fmt)   // 用格式 fmt 打印 *p
     // ... 只使用 *p 和 p[0] ...
 }
 ```
+
 ##### 例外
 
 C 风格的字符串是以单个指向以零结尾的字符序列的指针来传递的。
@@ -171,6 +176,7 @@ void f()
     // ...
 }
 ```
+
 `unique_ptr` 保证对它的对象进行删除（即便是发生异常时也如此），以此保护不发生泄漏。而 `T*` 做不到这点。
 
 ##### 示例
@@ -184,6 +190,7 @@ public:
     // ...
 };
 ```
+
 可以通过明确所有权来修正这个问题：
 
 ```cpp
@@ -195,6 +202,7 @@ public:
     // ...
 };
 ```
+
 ##### 例外
 
 最主要的例外就是遗留代码，尤其是那些必须维持可以用 C 编译或者通过 ABI 来建立 C 和 C 风格的 C++ 之间的接口的代码。
@@ -238,6 +246,7 @@ void caller(int n)
     delete p;
 }
 ```
+
 除了遭受[资源泄漏](#???)的问题外，这也带来了一组假性的分配和回收操作，而这其实是不必要的。如果 Gadget 可以廉价地从函数转移出来（就是说，它很小，或者具有高效的移动操作）的话，直接“按值”返回即可（参见[输出返回值](S-functions.md#Rf-out)）：
 
 ```cpp
@@ -248,6 +257,7 @@ Gadget make_gadget(int n)
     return g;
 }
 ```
+
 ##### 注解
 
 这条规则适用于工厂函数。
@@ -281,6 +291,7 @@ void f()
     delete &r;             // 不好: 违反了有关删除原生指针的规则
 }
 ```
+
 **参见**: [原生指针的规则](S-resource.md#Rr-ptr)
 
 ##### 强制实施
@@ -307,6 +318,7 @@ void f(int n)
     delete p;
 }
 ```
+
 可以用局部变量来代替它：
 
 ```cpp
@@ -316,6 +328,7 @@ void f(int n)
     // ...
 }
 ```
+
 ##### 强制实施
 
 * 【中级】 如果分配了某个对象，又在函数内的所有路径中都进行了回收，则给出警告。建议它应当被代之以一个局部的栈对象。
@@ -344,6 +357,7 @@ int get_median_value(const std::list<int>& integers)
   return local_buffer[size/2];
 }
 ```
+
 ### <a name="Rr-global"></a>R.6: 避免非 `const` 的全局变量
 
 参见 [I.2](S-interfaces.md#Ri-global)
@@ -384,6 +398,7 @@ void use()
     free(p2);    // 错误: 不能 free() 由 new 分配的对象
 }
 ```
+
 在某些实现中，`delete` 和 `free()` 可能可以工作，或者也可能引发运行时的错误。
 
 ##### 例外
@@ -433,6 +448,7 @@ void func(const string& name)
     // ...
 }
 ```
+
 `buf` 的分配可能会失败，并导致文件句柄的泄漏。
 
 ##### 示例
@@ -445,6 +461,7 @@ void func(const string& name)
     // ...
 }
 ```
+
 对文件句柄（在 `ifstream` 中）的使用是简单、高效而且安全的。
 
 ##### 强制实施
@@ -462,12 +479,14 @@ void func(const string& name)
 ```cpp
 void fun(shared_ptr<Widget> sp1, shared_ptr<Widget> sp2);
 ```
+
 可以这样调用 `fun`：
 
 ```cpp
 // 不好：可能会泄漏
 fun(shared_ptr<Widget>(new Widget(a, b)), shared_ptr<Widget>(new Widget(c, d)));
 ```
+
 这是异常不安全的，因为编译器可能会把两个用以创建函数的两个参数的表达式重新排序。
 特别是，编译器是可以交错执行这两个表达式的：
 它可能会首先为两个对象都（通过调用 `operator new`）进行内存分配，然后再试图调用二者的 `Widget` 构造函数。
@@ -480,11 +499,13 @@ fun(shared_ptr<Widget>(new Widget(a, b)), shared_ptr<Widget>(new Widget(c, d)));
 shared_ptr<Widget> sp1(new Widget(a, b)); // 好多了，但不太干净
 fun(sp1, new Widget(c, d));
 ```
+
 最佳的方案是使用返回所有者对象的工厂函数，而完全避免显式的分配：
 
 ```cpp
 fun(make_shared<Widget>(a, b), make_shared<Widget>(c, d)); // 最佳
 ```
+
 如果还没有，请自己编写一个工厂包装。
 
 ##### 强制实施
@@ -508,6 +529,7 @@ void f(int*);           // 对多个对象不建议的做法
 
 void f(gsl::span<int>); // 好，建议的做法
 ```
+
 ##### 强制实施
 
 标记出 `[]` 参数。代之以使用 `span`。
@@ -528,6 +550,7 @@ class X {
     // ...
 };
 ```
+
 ##### 注解
 
 如果想要无法进行回收的内存的话，可以将回收操作 `=delete`。
@@ -557,6 +580,7 @@ void f()
     auto p5 = make_shared<X>();   // 好，共享所有权
 }
 ```
+
 这里（只有）初始化 `p1` 的对象将会泄漏。
 
 ##### 强制实施
@@ -581,6 +605,7 @@ void f()
     // 局部范围中使用 base，并未进行复制——引用计数不会超过 1
 } // 销毁 base
 ```
+
 ##### 示例
 
 这样更加高效：
@@ -592,6 +617,7 @@ void f()
     // 局部范围中使用 base
 } // 销毁 base
 ```
+
 ##### 强制实施
 
 【简单】 如果函数所使用的 `Shared_pointer` 的对象是函数之内所分配的，而且既不会将这个 `Shared_pointer` 返回，也不会将其传递给其他接受 `Shared_pointer&` 的函数的话，就给出警告。建议代之以 `unique_ptr`。
@@ -611,6 +637,7 @@ void f()
 shared_ptr<X> p1 { new X{2} }; // 不好
 auto p = make_shared<X>(2);    // 好
 ```
+
 `make_shared()` 版本仅提到一次 `X`，因而它通常比显式的 `new` 方式要更简短（而且更快）。
 
 ##### 强制实施
@@ -631,6 +658,7 @@ unique_ptr<Foo> p {new Foo{7}};    // OK: 不过有重复
 
 auto q = make_unique<Foo>(7);      // 有改善: 并未重复 Foo
 ```
+
 ##### 强制实施
 
 【简单】 如果 `unique_ptr` 从 `new` 的结果而不是 `make_unique` 进行构造，就给出警告。
@@ -673,6 +701,7 @@ private:
   std::weak_ptr<foo> back_reference_;
 };
 ```
+
 ##### 注解
 
 ??? (HS: 许多人都说要“打破循环引用”，不过我觉得“临时性共享所有权”可能更关键。)
@@ -716,6 +745,7 @@ void f(CComPtr<widget> p)               // 根据 'sharedptrparam' 规则是错�
     p->foo();
 }
 ```
+
 上面两段根据 [`sharedptrparam` 指导方针](S-resource.md#Rr-smartptrparam)来说都是错误的：
 `p` 是一个 `Shared_pointer`，但其共享性质完全没有被用到，而对其进行按值传递则是一种暗含的劣化；
 这两个函数应当仅当它们需要参与 `widget` 的生存期管理时才接受智能指针。否则当可以为 `nullptr` 时它们就应当接受 `widget*`，否则，理想情况下，函数应当接受 `widget&`。
@@ -734,11 +764,13 @@ void sink(unique_ptr<widget>); // 获得这个 widget 的所有权
 
 void uses(widget*);            // 仅仅使用了这个 widget
 ```
+
 ##### 示例，不好
 
 ```cpp
 void thinko(const unique_ptr<widget>&); // 通常不是你想要的
 ```
+
 ##### 强制实施
 
 * 【简单】 如果函数以左值引用接受 `Unique_pointer<T>` 参数，但并未在至少一个代码路径中向其赋值或者对其调用 `reset()`，则给出警告。建议代之以接受 `T*` 或 `T&`。
@@ -759,11 +791,13 @@ void thinko(const unique_ptr<widget>&); // 通常不是你想要的
 ```cpp
 void reseat(unique_ptr<widget>&); // “将要”或“可能”重新置位指针
 ```
+
 ##### 示例，不好
 
 ```cpp
 void thinko(const unique_ptr<widget>&); // 通常不是你想要的
 ```
+
 ##### 强制实施
 
 * 【简单】 如果函数以左值引用接受 `Unique_pointer<T>` 参数，但并未在至少一个代码路径中向其赋值或者对其调用 `reset()`，则给出警告。建议代之以接受 `T*` 或 `T&`。
@@ -789,6 +823,7 @@ private:
     std::shared_ptr<widget> m_widget;
 };
 ```
+
 ##### 强制实施
 
 * 【简单】 如果函数以左值引用接受 `Shared_pointer<T>` 参数，但并未在至少一个代码路径中向其赋值或者对其调用 `reset()`，则给出警告。建议代之以接受 `T*` 或 `T&`。
@@ -814,6 +849,7 @@ void ChangeWidget(std::shared_ptr<widget>& w)
     w = std::make_shared<widget>(widget{});
 }
 ```
+
 ##### 强制实施
 
 * 【简单】 如果函数以左值引用接受 `Shared_pointer<T>` 参数，但并未在至少一个代码路径中向其赋值或者对其调用 `reset()`，则给出警告。建议代之以接受 `T*` 或 `T&`。
@@ -835,6 +871,7 @@ void reseat(shared_ptr<widget>&);          // “可能”重新置位指针
 
 void may_share(const shared_ptr<widget>&); // “可能”保持一个引用计数
 ```
+
 ##### 强制实施
 
 * 【简单】 如果函数以左值引用接受 `Shared_pointer<T>` 参数，但并未在至少一个代码路径中向其赋值或者对其调用 `reset()`，则给出警告。建议代之以接受 `T*` 或 `T&`。
@@ -873,6 +910,7 @@ void g()
     g_p = ...; // 噢，如果这就是这个 widget 的最后一个 shared_ptr 的话，这会销毁这个 widget
 }
 ```
+
 下面的代码是不应该通过代码评审的：
 
 ```cpp
@@ -886,6 +924,7 @@ void my_code()
     g_p->func();
 }
 ```
+
 修正很简单——获取该指针的一个局部副本，为调用树“保持一个引用计数”：
 
 ```cpp
@@ -901,6 +940,7 @@ void my_code()
     pin->func();
 }
 ```
+
 ##### 强制实施
 
 * 【简单】 如果从非局部或局部但潜在具有别名的智能指针变量（`Unique_pointer` 或 `Shared_pointer`）中所获取的指针或引用，被用于进行函数调用，则给出警告。如果智能指针是一个 `Shared_pointer`，则建议代之以获取该智能指针的一个局部副本并从中获取指针或引用。

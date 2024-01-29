@@ -1,4 +1,4 @@
-[C++ 核心指导方针](main.md)
+[C++ 核心指南](main.md)
 [概要](S-abstract.md)
 [In: 导言](S-introduction.md)
 [P: 理念](S-philosophy.md)

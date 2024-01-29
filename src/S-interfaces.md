@@ -52,6 +52,7 @@ int round(double d)
     return (round_up) ? ceil(d) : d;    // 请勿：“不可见的”依赖
 }
 ```
+
 两次调用 `round(7.2)` 的含义可能给出不同的结果，这对于调用者来说是不明显的。
 
 ##### 例外
@@ -67,6 +68,7 @@ int round(double d)
 // 请勿如此：fprintf 的返回值未进行检查
 fprintf(connection, "logging: %d %d %d\n", x, y, s);
 ```
+
 要是连接已经关闭而导致没有产生日志输出的话会怎么样？参见 I.???。
 
 **替代方案**: 抛出异常。异常是无法被忽略的。
@@ -105,6 +107,7 @@ void output()     // 请勿这样做
     // ... 使用 data ...
 }
 ```
+
 哪个可能会修改 `data` 呢？
 
 **警告**: 全局对象的初始化并不是完全有序的。
@@ -161,6 +164,7 @@ class Singleton {
     // 进行正确地初始化，等等
 };
 ```
+
 单例的想法有许多变种。
 这也是问题的一方面。
 
@@ -179,6 +183,7 @@ X& myX()
     return my_x;
 }
 ```
+
 这是解决初始化顺序相关问题的最有效方案之一。
 在多线程环境中，静态对象的初始化并不会引入数据竞争条件
 （除非你不小心在其构造函数中访问了某个共享对象）。
@@ -194,6 +199,7 @@ X& myX()
     return *p;  // 有可能泄漏
 }
 ```
+
 这样就必须有人以某种适当的线程安全方式来 `delete` 这个对象了。
 这是容易出错的，因此除了以下情况外我们并不使用这种技巧：
 
@@ -225,6 +231,7 @@ X& myX()
 ```cpp
 void pass(void* data);    // 使用弱的并且缺乏明确性的类型 void* 是有问题的
 ```
+
 调用者无法确定它允许使用哪些类型，而且因为它并没有指定 `const`，
 也不确定其数据是否会被改动。注意，任何指针类型都可以隐式转换为 `void*`，
 因此调用者很容易提供这样的值给它。
@@ -246,6 +253,7 @@ draw_rect(100, 200, 100, 500); // 这些数值什么意思？
 
 draw_rect(p.x, p.y, 10, 20); // 10 和 20 的单位是什么？
 ```
+
 很明显调用者在描述一个矩形，不明确的是它们都和其哪些部分相关。而且 `int` 可以表示任何形式的信息，包括各种不同单位的值，因此我们必须得猜测这四个 `int` 的含义。前两个很可能代表坐标对偶 `x` 和 `y`，但后两个是什么呢？
 
 注释和参数的名字可以有所帮助，但我们可以直截了当：
@@ -257,6 +265,7 @@ void draw_rectangle(Point top_left, Size height_width);
 draw_rectangle(p, Point{10, 20});  // 两个角点
 draw_rectangle(p, Size{10, 20});   // 一个角和一对 (height, width)
 ```
+
 显然，我们是无法利用静态类型系统识别所有的错误的，
 例如，假定第一个参数是左上角这一点就依赖于约定（命名或者注释）。
 
@@ -267,6 +276,7 @@ draw_rectangle(p, Size{10, 20});   // 一个角和一对 (height, width)
 ```cpp
 set_settings(true, false, 42); // 这些数值什么意思？
 ```
+
 各参数类型及其值并不能表明其所指定的设置项是什么以及它们的值所代表的含义。
 
 下面的设计则更加明确，安全且易读：
@@ -278,11 +288,13 @@ s.displayMode = alarm_settings::mode::spinning_light;
 s.frequency = alarm_settings::every_10_seconds;
 set_settings(s);
 ```
+
 对于一组布尔值的情况，可以考虑使用某种标记 `enum`；这是一种用于表示一组布尔值的模式。
 
 ```cpp
 enable_lamp_options(lamp_option::on | lamp_option::animate_state_transitions);
 ```
+
 ##### 示例，不好
 
 下例中，接口中并未明确给出 `time_to_blink` 的含义：按秒还是按毫秒算？
@@ -300,6 +312,7 @@ void use()
     blink_led(2);
 }
 ```
+
 ##### 示例，好
 
 `std::chrono::duration` 类型可以让时间段的单位明确下来。
@@ -317,6 +330,7 @@ void use()
     blink_led(1500ms);
 }
 ```
+
 这个函数还可以写成使其接受任何时间段单位的形式。
 
 ```cpp
@@ -336,6 +350,7 @@ void use()
     blink_led(1500ms);
 }
 ```
+
 ##### 强制实施
 
 * 【简单】 报告将 `void*` 用作参数或返回类型的情况
@@ -355,16 +370,19 @@ void use()
 ```cpp
 double sqrt(double x);
 ```
+
 这里 `x` 必须是非负数。类型系统是无法（简洁并自然地）表达这点的，因而我们得用别的方法。例如：
 
 ```cpp
 double sqrt(double x); // x 必须是非负数
 ```
+
 一些前条件可以表示为断言。例如：
 
 ```cpp
 double sqrt(double x) { Expects(x >= 0); /* ... */ }
 ```
+
 理想情况下，这个 `Expects(x >= 0)` 应当是 `sqrt()` 的接口的一部分，但我们无法轻易做到这点。当前，我们将之放入定义式（函数体）之中。
 
 **参考**: `Expects()` 在 [GSL](#???) 中有说明。
@@ -402,6 +420,7 @@ int area(int height, int width)
     // ...
 }
 ```
+
 ##### 注解
 
 前条件是可以用许多方式来说明的，包括代码注释，`if` 语句，以及 `assert()`。
@@ -438,6 +457,7 @@ int area(int height, int width)
 ```cpp
 int area(int height, int width) { return height * width; }  // 不好
 ```
+
 这里，我们（粗心大意地）遗漏了前条件的说明，因此高度和宽度必须是正数这点是不明确的。
 我们也遗漏了后条件的说明，因此算法（`height * width`）对于大于最大整数的面积来说是错误的这点是不明显的。
 可能会有溢出。
@@ -451,6 +471,7 @@ int area(int height, int width)
     return res;
 }
 ```
+
 ##### 示例，不好
 
 考虑一个著名的安全性 BUG：
@@ -463,6 +484,7 @@ void f()    // 有问题的
     memset(buffer, 0, sizeof(buffer));
 }
 ```
+
 由于没有后条件来说明缓冲区应当被清零，优化器可能会将这个看似多余的 `memset()` 调用给清除掉：
 
 ```cpp
@@ -474,6 +496,7 @@ void f()    // 有改进
     Ensures(buffer[0] == 0);
 }
 ```
+
 ##### 注解
 
 后条件通常是在说明函数目的的代码注释中非正式地进行说明的；用 `Ensures()` 可以使之更加系统化，更加明显，并且更容易检查。
@@ -495,6 +518,7 @@ void manipulate(Record& r)    // 请勿这样做
     // ... 没有 m.unlock() ...
 }
 ```
+
 这里，我们“忘记”说明应当释放 `mutex`，因此我们搞不清楚这里 `mutex` 释放的缺失是一个 BUG 还是一种功能特性。
 把后条件说明将使其更加明确：
 
@@ -505,6 +529,7 @@ void manipulate(Record& r)    // 后条件: m 在退出后是未锁定的
     // ... 没有 m.unlock() ...
 }
 ```
+
 现在这个 BUG 就明显了（但仅对阅读了代码注释的人类来说）。
 
 更好的做法是使用 [RAII](S-resource.md#Rr-raii) 来在代码中保证后条件（“锁必须进行释放”）的实施：
@@ -516,6 +541,7 @@ void manipulate(Record& r)    // 最好这样
     // ...
 }
 ```
+
 ##### 注解
 
 理想情况下，后条件应当在接口或声明式中说明，让使用者易于见到它们。
@@ -545,6 +571,7 @@ void f()
     Ensures(buffer[0] == 0);
 }
 ```
+
 ##### 注解
 
 后条件是可以用许多方式来说明的，包括代码注释，`if` 语句，以及 `assert()`。
@@ -580,6 +607,7 @@ Iter find(Iter first, Iter last, Val v)
     // ...
 }
 ```
+
 **参见**: [泛型编程](S-templates.md#SS-GP)和[概念](S-templates.md#SS-concepts)。
 
 ##### 强制实施
@@ -602,6 +630,7 @@ template<class F, class ...Args>
 // 好: 当无法启动一个新的线程时抛出 system_error
 explicit thread(F&& f, Args&&... args);
 ```
+
 ##### 注解
 
 错误是什么？
@@ -629,6 +658,7 @@ if (error_code) {
 }
 // ... 使用 val ...
 ```
+
 这种风格不幸地会导致未初始化的变量。
 从 C++17 开始，可以使用 "结构化绑定" 功能特性来从返回值直接对多个变量初始化。
 
@@ -639,6 +669,7 @@ if (error_code) {
 }
 // ... 使用 val ...
 ```
+
 ##### 注解
 
 我们并不认为“性能”是一种不使用异常的合理理由。
@@ -674,6 +705,7 @@ X* compute(args)    // 请勿这样做
     return res;
 }
 ```
+
 应当由谁来删除返回的这个 `X` 呢？如果 `compute` 返回引用的话这个问题将更难发现。
 应该考虑按值来返回结果（如果结果比较大的话就用移动语义）：
 
@@ -685,6 +717,7 @@ vector<double> compute(args)  // 好的
     return res;
 }
 ```
+
 **替代方案**: 用“智能指针”来[传递所有权](S-resource.md#Rr-smartptrparam)，比如 `unique_ptr`（专有所有权）和 `shared_ptr`（共享所有权）。
 这样做比返回对象自身来说并没有那么简炼，而且通常也不那么高效，
 因此，仅当需要引用语义时再使用智能指针。
@@ -700,6 +733,7 @@ owner<X*> compute(args)    // 现在就明确传递了所有权这一点
     return res;
 }
 ```
+
 这告诉了分析工具 `res` 是一个所有者。
 就是说，它的值必须被 `delete`，或者被传递给另一个所有者，正如这里的 `return` 所做。
 
@@ -738,6 +772,7 @@ int length(not_null<const char*> p);  // 有改善：可以假定 p 不可能为
 
 int length(const char* p);            // 只好假定 p 可以为 nullptr
 ```
+
 通过在源代码中说明意图，实现者和工具就可以提供更好的诊断能力，比如通过静态分析来找出某些种类的错误，还可以实施优化，比如移除分支和空值测试。
 
 ##### 注解
@@ -753,6 +788,7 @@ int length(const char* p);            // 只好假定 p 可以为 nullptr
 // 可以假定 p 指向以零终结的字符数组
 int length(not_null<zstring> p);
 ```
+
 注意： `length()` 显然是经过伪装的 `std::strlen()`。
 
 ##### 强制实施
@@ -773,6 +809,7 @@ int length(not_null<zstring> p);
 ```cpp
 void copy_n(const T* p, T* q, int n); // 从 [p:p+n) 复制到 [q:q+n)
 ```
+
 当由 `q` 所指向的数组少于 `n` 个元素会怎么样？此时我们将覆写一些可能无关的内存。
 当由 `p` 所指向的数组少于 `n` 个元素会怎么样？此时我们将读取一些可能无关的内存。
 此二者都是未定义的行为，而且可能是非常恶劣的 BUG。
@@ -784,6 +821,7 @@ void copy_n(const T* p, T* q, int n); // 从 [p:p+n) 复制到 [q:q+n)
 ```cpp
 void copy(span<const T> r, span<T> r2); // 将 r 复制给 r2
 ```
+
 ##### 示例，不好
 
 考虑：
@@ -794,6 +832,7 @@ Circle arr[10];
 // ...
 draw(arr, 10);
 ```
+
 把 `10` 作为参数 `n` 传递可能是错误的：虽然最常见的约定是假定有 `[0:n)`，但这点并未不是明确的。更糟糕的是，`draw()` 的调用通过编译了：这里有一次从数组到指针的隐式转换（数组退化），然后又进行了从 `Circle` 到 `Shape` 的另一次隐式转换。`draw()` 是不可能安全地迭代这个数组的：它无法知道元素的大小。
 
 **替代方案**: 使用一个辅助类来确保元素的数量正确，并避免进行危险的隐式转换。例如：
@@ -808,6 +847,7 @@ draw2(arr);    // 推断出元素的类型和数组大小
 void draw3(span<Shape>);
 draw3(arr);    // 错误: 无法将 Circle[10] 转换为 span<Shape>
 ```
+
 这个 `draw2()` 传递了与 `draw()` 同样数量的信息，但明确指定了它接受的是 `Circle` 的范围。参见 ???.
 
 ##### 例外
@@ -841,6 +881,7 @@ extern const Y y;
 
 const X x = g(y);   // 读取 y; 写入 x
 ```
+
 由于 `x` 和 `y` 是处于不同翻译单元之内的，调用 `f()` 和 `g()` 的顺序就是未定义的；
 我们可能会访问到还未初始化的 `const` 对象。
 这里展示的是，全局（命名空间作用域）对象的初始化顺序难题并不仅限于全局*变量*而已。
@@ -884,6 +925,7 @@ OutputIterator merge(InputIterator1 first1, InputIterator1 last1,
                      InputIterator2 first2, InputIterator2 last2,
                      OutputIterator result, Compare comp);
 ```
+
 注意，这属于上面的第一种问题：缺乏抽象。STL 传递的不是范围（抽象），而是一对迭代器（未封装的成分值）。
 
 其中有四个模板参数和六个函数参数。
@@ -895,6 +937,7 @@ OutputIterator merge(InputIterator1 first1, InputIterator1 last1,
                      InputIterator2 first2, InputIterator2 last2,
                      OutputIterator result);
 ```
+
 这实际上不会减低其整体复杂性，但它减少了对于许多使用者的表面复杂性。
 为了真正地减少参数的数量，我们得把参数归拢到更高层的抽象之中：
 
@@ -902,6 +945,7 @@ OutputIterator merge(InputIterator1 first1, InputIterator1 last1,
 template<class InputRange1, class InputRange2, class OutputIterator>
 OutputIterator merge(InputRange1 r1, InputRange2 r2, OutputIterator result);
 ```
+
 把参数成“批”进行组合是减少参数数量和增加进行检查的机会的一般性技巧。
 
 或者，我们也可以用标准库概念来定义“三个类型必须可以用于归并”：
@@ -911,6 +955,7 @@ template<class In1, class In2, class Out>
   requires mergeable<In1, In2, Out>
 Out merge(In1 r1, In2 r2, Out result);
 ```
+
 ##### 示例
 
 安全性剖面配置中建议将以下代码
@@ -918,11 +963,13 @@ Out merge(In1 r1, In2 r2, Out result);
 ```cpp
 void f(int* some_ints, int some_ints_length);  // 不好：C 风格，不安全
 ```
+
 替换为
 
 ```cpp
 void f(gsl::span<int> some_ints);              // 好：安全，有边界检查
 ```
+
 这样，使用一种抽象可以获得安全性和健壮性的好处，而且自然地减少了参数的数量。
 
 ##### 注解
@@ -952,6 +999,7 @@ void f(gsl::span<int> some_ints);              // 好：安全，有边界检查
 ```cpp
 void copy_n(T* p, T* q, int n);  // 从 [p:p + n) 复制到 [q:q + n)
 ```
+
 这是个 K&R C 风格接口的一种恶劣的变种。它导致很容易把“目标”和“来源”参数搞反。
 
 可以在“来源”参数上使用 `const`：
@@ -959,6 +1007,7 @@ void copy_n(T* p, T* q, int n);  // 从 [p:p + n) 复制到 [q:q + n)
 ```cpp
 void copy_n(const T* p, T* q, int n);  // 从 [p:p + n) 复制到 [q:q + n)
 ```
+
 ##### 例外
 
 当参数的顺序不重要时，不会造成问题：
@@ -966,6 +1015,7 @@ void copy_n(const T* p, T* q, int n);  // 从 [p:p + n) 复制到 [q:q + n)
 ```cpp
 int max(int a, int b);
 ```
+
 ##### 替代方案
 
 不要以指针来传递数组，而要传递用来表示一个范围的对象（比如一个 `span`）：
@@ -973,6 +1023,7 @@ int max(int a, int b);
 ```cpp
 void copy_n(span<const T> p, span<T> q);  // 从 p 复制到 q
 ```
+
 ##### 替代方案
 
 定义一个 `struct` 来作为参数类型，并依照各个参数来命名它的各字段：
@@ -985,6 +1036,7 @@ struct SystemParams {
 };
 void initialize(SystemParams p);
 ```
+
 这样做带来一种使其调用代码对于以后的读者变得明晰的倾向，因为这种参数
 在调用点通常都要按名字来进行填充。
 
@@ -1021,6 +1073,7 @@ private:
     Color col;
 };
 ```
+
 这将强制性要求每个派生类都要计算出一个中心点——即使这并不容易，而且这个中心点从不会被用到。相似地说，不是每个 `Shape` 都有一个 `Color`，而许多 `Shape` 也最好别用一个定义成一系列 `Point` 的轮廓来进行表示。使用抽象类要更好：
 
 ```cpp
@@ -1035,6 +1088,7 @@ public:
     virtual ~Shape() = default;        
 };
 ```
+
 ##### 强制实施
 
 【简单】 当把类 `C` 的指针/引用赋值给 `C` 的某个基类的指针/引用，而这个基类包含数据成员时，就给出警告。
@@ -1084,6 +1138,7 @@ public:
 };
 
 ```
+
 实现（widget.cpp）
 
 ```cpp
@@ -1099,6 +1154,7 @@ widget::widget(widget&&) noexcept = default;
 widget::~widget() = default;
 widget& widget::operator=(widget&&) noexcept = default;
 ```
+
 ##### 注解
 
 参见 [GOTW #100](https://herbsutter.com/gotw/_100/) 和 [cppreference](http://en.cppreference.com/w/cpp/language/pimpl) 有关这个手法相关的权衡和其他实现细节。
@@ -1133,6 +1189,7 @@ case file:          owned = true;  inp = new ifstream{argv[2]};      break;
 }
 istream& in = *inp;
 ```
+
 这违反了[避免未初始化变量](S-expr.md#Res-always)，
 [避免忽略所有权](S-interfaces.md#Ri-raw)，
 和[避免魔法常量](S-expr.md#Res-magic)等规则。
@@ -1141,6 +1198,7 @@ istream& in = *inp;
 ```cpp
 if (owned) delete inp;
 ```
+
 我们可以通过使用带有一个特殊的删除器（对 `cin` 不做任何事）的 `unique_ptr` 来处理这个特定的例子，
 但这对于新手来说较复杂（他们很容易遇到这种问题），并且这个例子其实是一个更一般的问题的特例：
 我们希望将其当做静态的某种属性（此处为所有权），需要在运行时进行
@@ -1165,6 +1223,7 @@ private:
     istream* inp = &cin;
 };
 ```
+
 这样，`istream` 的所有权的动态本质就被封装起来。
 大体上，在现实的代码中还是需要针对潜在的错误添加一些检查。
 

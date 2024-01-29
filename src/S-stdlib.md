@@ -69,6 +69,7 @@ class My_vector {
 
 }
 ```
+
 ##### 强制实施
 
 有可能，但很麻烦而且在一些平台上很可能导致一些问题。
@@ -116,6 +117,7 @@ int v[SIZE];                        // 不好
 
 std::array<int, SIZE> w;            // ok
 ```
+
 ##### 示例
 
 ```cpp
@@ -124,6 +126,7 @@ delete[] v;                         // 不好，手工 delete
 
 std::vector<int> w(initial_size);   // ok
 ```
+
 ##### 注解
 
 在不拥有而引用容器中的元素时使用 `gsl::span`。
@@ -174,6 +177,7 @@ std::vector<int> w(initial_size);   // ok
 vector<int> v1(20);  // v1 具有 20 个值为 0 的元素（vector<int>{}）
 vector<int> v2 {20}; // v2 具有 1 个值为 20 的元素
 ```
+
 [优先采用 `{}` 初始化式语法](S-expr.md#Res-list)。
 
 ##### 强制实施
@@ -216,6 +220,7 @@ void f()
     memcmp(a.data(), b.data(), 10);  // 不好，且包含长度错误（length = 10 * sizeof(int)）
 }
 ```
+
 而且，`std::array<>::fill()` 或 `std::fill()`，甚或是空的初始化式，都是比 `memset()` 更好的候选。
 
 ##### 示例，好
@@ -233,6 +238,7 @@ void f()
     }
 }
 ```
+
 ##### Example
 
 如果代码使用的是未修改的标准库，仍然有一些变通方案来以边界安全的方式使用 `std::array` 和 `std::vector`。代码中可以调用各个类的 `.at()` 成员函数，这将抛出 `std::out_of_range` 异常。或者，代码中可以调用 `at()` 自由函数，这将在边界违例时导致快速失败（或者某个自定义动作）。
@@ -249,6 +255,7 @@ void f(std::vector<int>& v, std::array<int, 12> a, int i)
     v.at(0) = at(a, i); // OK（替代方案 2）
 }
 ```
+
 ##### 强制实施
 
 * 对于没有边界检查的标准库函数的任何调用都给出诊断消息。
@@ -286,6 +293,7 @@ void f (derived& a, derived& b) // 虚表再见！
     memcmp(&a, &b, sizeof(derived));
 }
 ```
+
 应当代之以定义适当的默认初始化，复制，以及比较函数
 
 ```cpp
@@ -296,6 +304,7 @@ void g(derived& a, derived& b)
     if (a == b) do_something(a,b);
 }
 ```
+
 ##### 强制实施
 
 * 对在不可平凡复制的类型使用这些函数进行标记
@@ -355,6 +364,7 @@ vector<string> read_until(const string& terminator)
     return res;
 }
 ```
+
 注意已经为 `string` 提供了 `>>` 和 `!=`（作为有用操作的例子），并且没有显示的内存分配，
 回收，或者范围检查（`string` 会处理这些）。
 
@@ -369,6 +379,7 @@ vector<string> read_until(string_view terminator)   // C++17
     return res;
 }
 ```
+
 ##### 示例，不好
 
 不要使用 C 风格的字符串来进行需要不单纯的内存管理的操作：
@@ -387,6 +398,7 @@ char* cat(const char* s1, const char* s2)   // 当心！
     return p;
 }
 ```
+
 我们搞对了吗？
 调用者能记得要对返回的指针调用 `free()` 吗？
 这段代码能通过安全性评审吗？
@@ -420,6 +432,7 @@ void user(zstring p, const string& s, string_view ss)
     // ...
 }
 ```
+
 ##### 注解
 
 `std::string_view`（C++17）是只读的。
@@ -442,6 +455,7 @@ void user(zstring p, const string& s, string_view ss)
 ```cpp
 void f1(const char* s); // s 可能是个字符串
 ```
+
 我们所知的只不过是它可能是 nullptr 或者指向至少一个字符
 
 ```cpp
@@ -449,6 +463,7 @@ void f1(zstring s);     // s 是 C 风格字符串或者 nullptr
 void f1(czstring s);    // s 是 C 风格字符串常量或者 nullptr
 void f1(std::byte* s);  // s 是某个字节的指针（C++17）
 ```
+
 ##### 注解
 
 除非确实有理由，否则不要把 C 风格的字符串转换为 `string`。
@@ -491,6 +506,7 @@ void use()
     print(arr);   // 运行时错误；可能非常糟糕
 }
 ```
+
 数组 `arr` 并非 C 风格字符串，因为它不是零结尾的。
 
 ##### 替代方案
@@ -513,6 +529,7 @@ void use()
 ```cpp
 ???
 ```
+
 ##### 注解
 
 C++17
@@ -533,6 +550,7 @@ C++17
 ```cpp
 ???
 ```
+
 ##### 注解
 
 ???
@@ -575,6 +593,7 @@ pair pp4 = {"Tokyo"s, 9.00};                 // {std::string,double}    // C++17
 
 
 ```
+
 ##### 强制实施
 
 ???
@@ -615,6 +634,7 @@ if (i == 128) {
     // ... 处理过长的字符串 ....
 }
 ```
+
 更好的做法（简单得多而且可能更快）：
 
 ```cpp
@@ -622,6 +642,7 @@ string s;
 s.reserve(128);
 cin>>s;
 ```
+
 而且额能并不需要 `reserve(128)`。
 
 ##### 强制实施
@@ -641,6 +662,7 @@ cin>>s;
 ```cpp
 ???
 ```
+
 ##### 强制实施
 
 ???
@@ -658,6 +680,7 @@ cin>>s;
 complex<double> z{ 3,4 };
 cout << z << '\n';
 ```
+
 `complex` 是一个用户定义的类型，而其 I/O 的定义无需改动 `iostream` 库。
 
 ##### 示例
@@ -667,6 +690,7 @@ cout << z << '\n';
 for (complex<double> z; cin>>z)
     v.push_back(z);
 ```
+
 ##### 例外
 
 ??? 性能 ???
@@ -704,6 +728,7 @@ int main()
     // ... 使用 iostreams ...
 }
 ```
+
 ##### 强制实施
 
 ???
@@ -722,6 +747,7 @@ int main()
 cout << "Hello, World!" << endl;    // 两次输出操作和一次 flush
 cout << "hello, World!\n";          // 一次输出操作且没有 flush
 ```
+
 ##### 注解
 
 对于 `cin`/`cout`（或同等设备）的交互来说，没什么原因必须进行冲洗；它们是自动进行的。
